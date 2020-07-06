@@ -1,0 +1,219 @@
+#version 330 core
+out vec4 FragColor;
+in vec2 texcoord;
+
+struct Camera
+{
+    float scale;
+    vec3 position;
+    vec3 front;
+    vec3 right;
+    vec3 up;
+    int width;
+    int height;
+};
+uniform Camera camera;
+struct Polygon
+{
+    vec3 v1;
+    vec3 v2;
+    vec3 v3;
+    vec3 normal;
+};
+vec3 intersectPoint(vec3 rayVector, vec3 rayPoint, vec3 planeNormal, vec3 planePoint)
+{
+    vec3 diff = rayPoint - planePoint;
+    float prod1 = dot(diff, planeNormal);
+    float prod2 = dot(rayVector, planeNormal);
+    float ratio = prod1 / prod2;
+
+    return rayPoint - rayVector * ratio;
+}
+bool pointInPolygon(vec3 v, Polygon p)
+{
+    float area = length(cross((p.v1 - p.v2), (p.v3 - p.v2))) * 0.5f;
+
+    float a = length(cross((v - p.v2), (v - p.v3))) / (2 * area);
+    float b = length(cross((v - p.v3), (v - p.v1))) / (2 * area);
+    float c = length(cross((v - p.v2), (v - p.v1))) / (2 * area);
+
+    float tresh = 1.0f + 0.0001f;
+    return a <= tresh && a >= 0 && b <= tresh && b >= 0 && c <= tresh && c >= 0 && (a + b + c) <= tresh;
+}
+bool pointInPolygon(vec3 v, vec3 v1, vec3 v2, vec3 v3)
+{
+    float area = length(cross((v1 - v2), (v3 - v2))) * 0.5f;
+
+    float a = length(cross((v - v2), (v - v3))) / (2 * area);
+    float b = length(cross((v - v3), (v - v1))) / (2 * area);
+    float c = length(cross((v - v2), (v - v1))) / (2 * area);
+
+    float tresh = 1.0f + 0.0001f;
+    return a <= tresh && a >= 0 && b <= tresh && b >= 0 && c <= tresh && c >= 0 && (a + b + c) <= tresh;
+}
+float cube[] = float[](
+    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
+    -1.0f,-1.0f, 1.0f,
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, 0.0f, 0.0f,       // triangle 1 : end
+    1.0f, 1.0f,-1.0f, // triangle 2 : begin
+    -1.0f,-1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f,
+    0.0f, 0.0f, -1.0f, // triangle 2 : end
+    1.0f,-1.0f, 1.0f,//3
+    -1.0f,-1.0f,-1.0f,
+    1.0f,-1.0f,-1.0f,
+    0.0f, -1.0f, 0.0f,
+    1.0f, 1.0f,-1.0f,//4
+    1.0f,-1.0f,-1.0f,
+    -1.0f,-1.0f,-1.0f,
+     0.0f, 0.0f, -1.0f,
+    -1.0f,-1.0f,-1.0f,//5
+    -1.0f, 1.0f, 1.0f,
+    -1.0f, 1.0f,-1.0f,
+    -1.0f, 0.0f, 0.0f,
+    1.0f,-1.0f, 1.0f,//6
+    -1.0f,-1.0f, 1.0f,
+    -1.0f,-1.0f,-1.0f,
+    0.0f, -1.0f, 0.0f,
+    -1.0f, 1.0f, 1.0f,//7
+    -1.0f,-1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    1.0f, 1.0f, 1.0f,//8
+    1.0f,-1.0f,-1.0f,
+    1.0f, 1.0f,-1.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f,-1.0f,-1.0f,//9
+    1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    1.0f, 0.0f, 0.0f,
+    1.0f, 1.0f, 1.0f,//10
+    1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f,-1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 1.0f,//11
+    -1.0f, 1.0f,-1.0f,
+    -1.0f, 1.0f, 1.0f,
+    0.0f, 1.0f, 0.0f,
+    1.0f, 1.0f, 1.0f,//12
+    -1.0f, 1.0f, 1.0f,
+    1.0f,-1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f
+);
+struct Hit 
+{ vec3 pos; vec3 normal; };
+struct Ray 
+{
+ vec3 orig; 
+ vec3 dir;
+};
+bool intersectsCube(vec3 ray, vec3 shift)
+{
+    for(int i=0; i < 12; i++)
+    {
+        int off = i*12;
+        vec3 src = camera.position - shift;
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
+        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off]),vec3(cube[3+off], cube[4+off], cube[5+off]), vec3(cube[6+off], cube[7+off], cube[8+off])) && dot(contact-src, ray) > 0)
+            return true;
+    }
+
+    return false;
+}
+bool intersect(Ray r, vec3 min, vec3 max) 
+{ 
+    float tmin = (min.x - r.orig.x) / r.dir.x; 
+    float tmax = (max.x - r.orig.x) / r.dir.x; 
+ 
+    if (tmin > tmax) 
+    {
+        float tmp = tmin;
+        tmin = tmax;
+        tmax = tmp;
+    } 
+ 
+    float tymin = (min.y - r.orig.y) / r.dir.y; 
+    float tymax = (max.y - r.orig.y) / r.dir.y; 
+ 
+    if (tymin > tymax) 
+    {
+        float tmp = tymin;
+        tymin = tymax;
+        tymax = tmp;
+    }
+ 
+    if ((tmin > tymax) || (tymin > tmax)) 
+        return false; 
+ 
+    if (tymin > tmin) 
+        tmin = tymin; 
+ 
+    if (tymax < tmax) 
+        tmax = tymax; 
+ 
+    float tzmin = (min.z - r.orig.z) / r.dir.z; 
+    float tzmax = (max.z - r.orig.z) / r.dir.z; 
+ 
+    if (tzmin > tzmax) 
+    {
+        float tmp = tzmin;
+        tzmin = tzmax;
+        tzmax = tmp;
+    }
+ 
+    if ((tmin > tzmax) || (tzmin > tmax)) 
+        return false; 
+ 
+    if (tzmin > tmin) 
+        tmin = tzmin; 
+ 
+    if (tzmax < tmax) 
+        tmax = tzmax; 
+ 
+    return true; 
+} 
+vec3 lightDir = normalize(vec3(-0.2f,-0.8f,-0.2f));
+
+float dist2(vec3 v1, vec3 v2)
+{
+    return dot(v1-v2, v1-v2);
+}
+Hit intersectsCubePoint(vec3 ray, vec3 shift)
+{
+    Hit hit = Hit(vec3(-199, -199, -199), vec3(cube[9], cube[10], cube[11]));
+    for(int i=0; i < 12; i++)
+    {
+        int off = i*12;
+        vec3 src = camera.position - shift;
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
+        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off]),vec3(cube[3+off], cube[4+off], cube[5+off]), vec3(cube[6+off], cube[7+off], cube[8+off])) 
+            && dot(contact-src, ray) > 0 && dist2(contact, src)<dist2(src, hit.pos))
+            hit = Hit(contact, vec3(cube[9+off], cube[10+off], cube[11+off]));
+    }
+
+    return hit;
+}
+vec3 intersectsScene(vec3 ray)
+{
+    for(int i=0;i<100; ++i)
+    {
+        Ray r = Ray(camera.position - vec3(i*3+3,0,0), ray);
+        if(intersect(r, vec3(-1,-1,-1), vec3(1,1,1)))
+        {
+            Hit hit = intersectsCubePoint(ray, vec3(i*3+3,0,0));
+            float slope = abs(dot(hit.normal, normalize(ray)));
+            return vec3(slope, slope, slope);
+        }
+    }
+    return vec3(0,0,0);
+}
+
+void main() 
+{
+    vec3 ray = camera.front + camera.right * float(texcoord.x*camera.width - camera.width / 2) * camera.scale + camera.up * float(texcoord.y*camera.height - camera.height / 2) * camera.scale;
+
+    
+    FragColor = vec4(intersectsScene(ray), 1.0f);
+   
+}

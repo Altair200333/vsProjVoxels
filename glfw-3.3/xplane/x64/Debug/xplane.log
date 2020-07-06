@@ -1,0 +1,5 @@
+﻿E:\Programms\VISUALSTUDIO\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(459,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (xplane.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  SceneRenderer.cpp
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.cpp(22,33): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.cpp(22,29): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+  xplane.vcxproj -> E:\WORK\CPP\vsProjVoxels\glfw-3.3\build\x64\Debug\mixer.exe
