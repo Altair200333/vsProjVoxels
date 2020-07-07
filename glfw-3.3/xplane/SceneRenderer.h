@@ -18,7 +18,7 @@ protected:
 	Shader shader;
 public:
 	std::vector<glm::vec4> voxels;
-	int demon = 10;
+	int demon = 100;
 	double _bin_size = 1;
 
 	struct Ray
@@ -121,17 +121,33 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		voxels.resize(demon*demon*demon, {0, 0, 0, 0});
-		voxels[getId(0, 0, 0, demon)] = {1, 1, 1, 1};
-		voxels[getId(1, 2, 3, demon)] = {0, 2, 0, 1};
-		voxels[getId(3, 3, 3, demon)] = {0, 2, 0, 1};
-		voxels[getId(0, 5, 3, demon)] = {0, 2, 0, 1};
-		voxels[getId(1, 4, 3, demon)] = {0, 2, 0, 1};
-		voxels[getId(1, 2, 6, demon)] = {0, 2, 0, 1};
+		for(int i=0;i<30;i++)
+		{
+			voxels[getId(i*2, 0, 0, demon)] = { 1, 1, 1, 1 };
 
-		auto v = voxel_traversal_closest({ 0,0,3 }, { 1,2,0 }, 10);
+		}
 		
+		loadAll();
 	}
+	void loadAll()
+	{
+		unsigned int texture1;
+		glGenBuffers(1, &texture1);
+		glBindBuffer(GL_TEXTURE_BUFFER, texture1);
+		glBufferData(GL_TEXTURE_BUFFER, voxels.size() * sizeof(glm::vec4), &voxels[0], GL_STATIC_DRAW);
 
+		GLuint id;
+		glGenTextures(1, &id);
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, texture1);
+
+		glBindBuffer(GL_TEXTURE_BUFFER, 0);
+		glBindTexture(GL_TEXTURE_BUFFER, 0);
+
+		shader.setInt("boxes", voxels.size());
+	}
 	void clearBuffer();
 
 	void drawScene() const;

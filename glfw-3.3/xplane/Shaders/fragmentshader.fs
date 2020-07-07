@@ -198,7 +198,7 @@ Hit intersectsCubePoint(vec3 ray, vec3 shift)
 }
 uniform int boxes;
 float _bin_size = 1;
-int demon = 10;
+int demon = 100;
 
 int getId(vec3 v, int dim)
 {
@@ -218,10 +218,14 @@ vec3 voxel_traversal_closest(vec3 origin, vec3 dir, int steps)
 {
     vec3 ray = origin;
     dir = normalize(dir);
+
+    float step = 0.03f;
     for (int i=0;i<steps;i++)
     {
-        ray += dir * 0.1f;
-        if(voxels(getId(ray, demon)).w!=0 && intersect(Ray(origin-ray, dir), -vec3(1,1,1), vec3(1, 1, 1)))
+        ray += dir * step;
+        if(i>200)
+            step +=0.001f;
+        if(voxels(getId(ray, demon)).w!=0 && intersect(Ray(origin-ray, dir), vec3(-1,-1,-1), vec3(1, 1, 1)))
         {
             return ray;
         }
@@ -241,8 +245,7 @@ vec3 intersectsTestScene(vec3 ray)
         if(intersect(r, vec3(-1,-1,-1), vec3(1,1,1)))
         {            
             Hit hit = intersectsCubePoint(ray, shift);
-
-            
+ 
             float slope = abs(dot(hit.normal, normalize(ray)));
             return vec3(slope, slope, slope);
         }
@@ -252,7 +255,7 @@ vec3 intersectsTestScene(vec3 ray)
 vec3 traverse(vec3 ray)
 {
     vec3 shift = vec3(10,10,10);
-    vec3 res = voxel_traversal_closest(camera.position, ray, 500);
+    vec3 res = voxel_traversal_closest(camera.position, ray, 1000);
     if(res.x!=-1)
         return vec3(1,1,1);
 

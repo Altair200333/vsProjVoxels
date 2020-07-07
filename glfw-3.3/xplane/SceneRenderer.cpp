@@ -30,22 +30,7 @@ void SceneRenderer::drawScene() const
     shader.setInt("camera.width", window->width);
     shader.setInt("camera.height", window->height);
     //
-    unsigned int texture1;
-    glGenBuffers(1, &texture1);
-    glBindBuffer(GL_TEXTURE_BUFFER, texture1);
-    glBufferData(GL_TEXTURE_BUFFER, voxels.size() * sizeof(glm::vec4), &voxels[0], GL_STATIC_DRAW);
-
-    GLuint id;
-    glGenTextures(1, &id);
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, texture1);
-
-    glBindBuffer(GL_TEXTURE_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_BUFFER, 0);
-
-    shader.setInt("boxes", voxels.size());
+   
 	//ooo kurwa magic
     GLuint vao; glGenVertexArrays(1, &vao); glBindVertexArray(vao); glDrawArrays(GL_POINTS, 0, 1);
 }
