@@ -2,6 +2,7 @@
 out vec4 FragColor;
 in vec2 texcoord;
 
+#define DBL_MAX 3.402823466e+38F 
 struct Camera
 {
     float scale;
@@ -13,6 +14,7 @@ struct Camera
     int height;
 };
 uniform Camera camera;
+uniform samplerBuffer VertexSampler0;
 struct Polygon
 {
     vec3 v1;
@@ -194,26 +196,137 @@ Hit intersectsCubePoint(vec3 ray, vec3 shift)
 
     return hit;
 }
-vec3 intersectsScene(vec3 ray)
+uniform int boxes;
+float _bin_size = 1;
+int demon = 10;
+
+int getId(vec3 v, int dim)
 {
-    for(int i=0;i<100; ++i)
+    return  int(v.z) * dim * dim + int(v.y) * dim + int(v.x);
+}
+vec4 voxels(int id)
+{
+    return texelFetch(VertexSampler0, id);
+}
+vec3 voxel_traversal_closest(vec3 ray_start, vec3 ray_end)
     {
-        Ray r = Ray(camera.position - vec3(i*3+3,0,0), ray);
+        int id = getId(ray_start, demon);
+        // This id of the first/current voxel hit by the ray.
+        // Using floor (round down) is actually very important,
+        // the implicit int-casting will round up for negative numbers.
+        vec3 current_voxel = vec3(floor(ray_start[0] / _bin_size),
+            floor(ray_start[1] / _bin_size),
+            floor(ray_start[2] / _bin_size));
+
+        // The id of the last voxel hit by the ray.
+        // TODO: what happens if the end point is on a border?
+        vec3 last_voxel= vec3(floor(ray_end[0] / _bin_size),
+            floor(ray_end[1] / _bin_size),
+            floor(ray_end[2] / _bin_size));
+
+        // Compute normalized ray direction.
+        vec3 ray = ray_end - ray_start;
+        //ray.normalize();
+
+        // In which direction the voxel ids are incremented.
+        float stepX = (ray[0] >= 0) ? 1 : -1; // correct
+        float stepY = (ray[1] >= 0) ? 1 : -1; // correct
+        float stepZ = (ray[2] >= 0) ? 1 : -1; // correct
+
+        // Distance along the ray to the next voxel border from the current position (tMaxX, tMaxY, tMaxZ).
+        float next_voxel_boundary_x = (current_voxel[0] + stepX) * _bin_size; // correct
+        float next_voxel_boundary_y = (current_voxel[1] + stepY) * _bin_size; // correct
+        float next_voxel_boundary_z = (current_voxel[2] + stepZ) * _bin_size; // correct
+
+        // tMaxX, tMaxY, tMaxZ -- distance until next intersection with voxel-border
+        // the value of t at which the ray crosses the first vertical voxel boundary
+        float tMaxX = (ray[0] != 0) ? (next_voxel_boundary_x - ray_start[0]) / ray[0] : DBL_MAX; //
+        float tMaxY = (ray[1] != 0) ? (next_voxel_boundary_y - ray_start[1]) / ray[1] : DBL_MAX; //
+        float tMaxZ = (ray[2] != 0) ? (next_voxel_boundary_z - ray_start[2]) / ray[2] : DBL_MAX; //
+
+        // tDeltaX, tDeltaY, tDeltaZ --
+        // how far along the ray we must move for the horizontal component to equal the width of a voxel
+        // the direction in which we traverse the grid
+        // can only be FLT_MAX if we never go in that direction
+        float tDeltaX = (ray[0] != 0) ? _bin_size / ray[0] * stepX : DBL_MAX;
+        float tDeltaY = (ray[1] != 0) ? _bin_size / ray[1] * stepY : DBL_MAX;
+        float tDeltaZ = (ray[2] != 0) ? _bin_size / ray[2] * stepZ : DBL_MAX;
+
+        vec3 diff = vec3(0, 0, 0);
+        bool neg_ray = false;
+        if (current_voxel[0] != last_voxel[0] && ray[0] < 0) { diff[0]--; neg_ray = true; }
+        if (current_voxel[1] != last_voxel[1] && ray[1] < 0) { diff[1]--; neg_ray = true; }
+        if (current_voxel[2] != last_voxel[2] && ray[2] < 0) { diff[2]--; neg_ray = true; }
+        if(id != getId(current_voxel, demon) && voxels(getId(current_voxel, demon)).w != 0)
+            return current_voxel;
+        if (neg_ray) {
+            current_voxel += diff;
+            if (id != getId(current_voxel, demon) && voxels(getId(current_voxel, demon)).w != 0)
+                return current_voxel;
+        }
+
+        while (last_voxel != current_voxel) {
+            if (tMaxX < tMaxY) {
+                if (tMaxX < tMaxZ) {
+                    current_voxel[0] += stepX;
+                    tMaxX += tDeltaX;
+                }
+                else {
+                    current_voxel[2] += stepZ;
+                    tMaxZ += tDeltaZ;
+                }
+            }
+            else {
+                if (tMaxY < tMaxZ) {
+                    current_voxel[1] += stepY;
+                    tMaxY += tDeltaY;
+                }
+                else {
+                    current_voxel[2] += stepZ;
+                    tMaxZ += tDeltaZ;
+                }
+            }
+            if (id != getId(current_voxel, demon) && voxels(getId(current_voxel, demon)).w != 0)
+                return current_voxel;
+        }
+        return vec3(-1,-1,-1);
+    }
+
+vec3 intersectsTestScene(vec3 ray)
+{
+    for(int i=0;i<boxes; ++i)
+    {
+        vec3 shift = vec3(2*i,0,0);//texelFetch(VertexSampler0, i).xyz;
+        //if(texelFetch(VertexSampler0, i).w == 0)
+        //    continue;
+        vec3 src = camera.position - shift;
+        Ray r = Ray(src, ray);
         if(intersect(r, vec3(-1,-1,-1), vec3(1,1,1)))
-        {
-            Hit hit = intersectsCubePoint(ray, vec3(i*3+3,0,0));
+        {            
+            Hit hit = intersectsCubePoint(ray, shift);
+
+            
             float slope = abs(dot(hit.normal, normalize(ray)));
             return vec3(slope, slope, slope);
         }
     }
     return vec3(0,0,0);
 }
-
+vec3 traverse(vec3 ray)
+{
+    vec3 res = voxel_traversal_closest(camera.position, camera.position+ray*10);
+    if(res.x <= -1)
+        return vec3(0,0,0);
+    else
+    {
+        return vec3(1, 1, 1);
+    }
+}
 void main() 
 {
     vec3 ray = camera.front + camera.right * float(texcoord.x*camera.width - camera.width / 2) * camera.scale + camera.up * float(texcoord.y*camera.height - camera.height / 2) * camera.scale;
 
     
-    FragColor = vec4(intersectsScene(ray), 1.0f);
+    FragColor = vec4(traverse(ray), 1.0f);
    
 }
