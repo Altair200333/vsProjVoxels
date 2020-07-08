@@ -104,7 +104,7 @@ float cube[] = float[](
     0.0f, 0.0f, 1.0f
 );
 struct Hit 
-{ vec3 pos; vec3 normal; };
+{ vec3 pos; vec3 normal; bool hit;};
 struct Ray 
 {
  vec3 orig; 
@@ -116,8 +116,8 @@ bool intersectsCube(vec3 ray, vec3 shift)
     {
         int off = i*12;
         vec3 src = camera.position - shift;
-        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
-        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off]),vec3(cube[3+off], cube[4+off], cube[5+off]), vec3(cube[6+off], cube[7+off], cube[8+off])) && dot(contact-src, ray) > 0)
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off])*0.5f, vec3(cube[0+off], cube[1+off], cube[2+off]));
+        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f,vec3(cube[3+off], cube[4+off], cube[5+off])*0.5f, vec3(cube[6+off], cube[7+off], cube[8+off])*0.5f) && dot(contact-src, ray) > 0)
             return true;
     }
 
@@ -183,86 +183,94 @@ float dist2(vec3 v1, vec3 v2)
 }
 Hit intersectsCubePoint(vec3 ray, vec3 shift)
 {
-    Hit hit = Hit(vec3(-199, -199, -199), vec3(cube[9], cube[10], cube[11]));
+    Hit hit = Hit(vec3(-199, -199, -199), vec3(cube[9], cube[10], cube[11]), false);
     for(int i=0; i < 12; i++)
     {
         int off = i*12;
         vec3 src = camera.position - shift;
-        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
-        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off]),vec3(cube[3+off], cube[4+off], cube[5+off]), vec3(cube[6+off], cube[7+off], cube[8+off])) 
-            && dot(contact-src, ray) > 0 && dist2(contact, src)<dist2(src, hit.pos))
-            hit = Hit(contact, vec3(cube[9+off], cube[10+off], cube[11+off]));
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f);
+        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f,vec3(cube[3+off], cube[4+off], cube[5+off])*0.5f, vec3(cube[6+off], cube[7+off], cube[8+off])*0.5f) 
+            && dist2(contact, src)<dist2(src, hit.pos))
+            hit = Hit(contact, vec3(cube[9+off], cube[10+off], cube[11+off]), true);
     }
 
     return hit;
 }
 uniform int boxes;
 float _bin_size = 1;
-int demon = 500;
+int demon = 100;
 
 int getId(vec3 v, int dim)
 {
-    return  int(v.z) * dim * dim + int(v.y) * dim + int(v.x);
+    return  int(round(v.z)) * dim * dim + int(round(v.y)) * dim + int(round(v.x));
 }
 vec4 voxels(int id)
 {
     return texelFetch(VertexSampler0, id);
 }
 
-vec3 getNext(vec3 origin, vec3 dir, float step)
-{
-    vec3 ray = normalize(dir)*0.5f * step;
-    return origin + ray;
-}
 vec3 voxel_traversal_closest(vec3 origin, vec3 dir, int steps)
 {
     vec3 ray = origin;
     dir = normalize(dir);
 
-    float step = 0.03f;
+    float step = 0.005f;
     int lastId=-1;
     for (int i=0;i<steps;i++)
     {
         ray += dir * step;
-        vec3 shift = vec3(round(ray.x+0.5f),round(ray.y+0.5f),round(ray.z));
+        vec3 shift = vec3(round(ray.x),round(ray.y),round(ray.z));
 
-        if(shift.x>demon || shift.x<0 ||shift.y>demon || shift.y<0 ||shift.z>demon || shift.z<0)
+        if(shift.x>demon || shift.x<=0 ||shift.y>demon || shift.y<=0 ||shift.z>demon || shift.z<=0)
             vec3(-1,-1,-1);
-        if(i>200)
+        if(i>700)
             step +=0.001f;
-        if(voxels(getId(shift, demon)).w!=0 && intersect(Ray(origin-shift, dir), vec3(-1,-1,-1), vec3(1, 1, 1)))
+
+        if(voxels(getId(shift, demon)).w!=0 && intersect(Ray(camera.position-shift, dir), -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)))
         {
-            return ray;
+            return shift;
         }
     }
-    return vec3(-1,-1,-1);
+    return vec3(-10,-1,-1);
 }
 
 vec3 intersectsTestScene(vec3 ray)
 {
-    for(int i=0;i<boxes; ++i)
+    ray = normalize(ray);
+    for(int i=0;i<20; ++i)
     {
         vec3 shift = vec3(2*i,0,0);//texelFetch(VertexSampler0, i).xyz;
-        //if(texelFetch(VertexSampler0, i).w == 0)
-        //    continue;
+        if(voxels(getId(shift, demon)).w==0)
+            continue;
         vec3 src = camera.position - shift;
         Ray r = Ray(src, ray);
-        if(intersect(r, vec3(-1,-1,-1), vec3(1,1,1)))
+        if(intersect(r, -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)))
         {            
             Hit hit = intersectsCubePoint(ray, shift);
- 
-            float slope = abs(dot(hit.normal, normalize(ray)));
-            return vec3(slope, slope, slope);
+            if(hit.hit)
+            {
+                float slope = abs(dot(hit.normal, normalize(ray)));
+                return vec3((hit.pos.x+1)*0.5f, 0.2f, 0.2f);
+            }
+            return vec3(1,1,1);
         }
     }
     return vec3(0,0,0);
 }
 vec3 traverse(vec3 ray)
 {
-    vec3 shift = vec3(10,10,10);
     vec3 res = voxel_traversal_closest(camera.position, ray, 1000);
-    if(res.x!=-1)
+    if(res.x!=-10)
+    {
+        //return vec3(1,1,1);
+        Hit hit = intersectsCubePoint(ray, res);
+        if(hit.hit)
+        {
+            float slope = abs(dot(hit.normal, normalize(ray)));
+            return vec3(slope);
+        }
         return vec3(1,1,1);
+    }
 
     return vec3(0,0,0);
 }

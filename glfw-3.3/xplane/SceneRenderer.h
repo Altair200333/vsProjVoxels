@@ -18,7 +18,7 @@ protected:
 	Shader shader;
 public:
 	std::vector<glm::vec4> voxels;
-	int demon = 500;
+	int demon = 100;
 	double _bin_size = 1;
 
 	struct Ray
@@ -121,12 +121,9 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		voxels.resize(demon*demon*demon, {0, 0, 0, 0});
-		for(int i=0;i<100;i++)
+		for(int i=0;i<30;i++)
 		{
-			for (int j = 0; j < 100; j++)
-			{
-				voxels[getId(i, 0, j, demon)] = { 1, 1, 1, 1 };
-			}
+			voxels[getId(i, 0, 0, demon)] = { 0.6f,0.6f, 1, 1 };
 		}
 		
 		loadAll();
