@@ -54,54 +54,54 @@ bool pointInPolygon(vec3 v, vec3 v1, vec3 v2, vec3 v3)
     return a <= tresh && a >= 0 && b <= tresh && b >= 0 && c <= tresh && c >= 0 && (a + b + c) <= tresh;
 }
 float cube[] = float[](
-    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
-    -1.0f,-1.0f, 1.0f,
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 0.0f, 0.0f,       // triangle 1 : end
-    1.0f, 1.0f,-1.0f, // triangle 2 : begin
-    -1.0f,-1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-    0.0f, 0.0f, -1.0f, // triangle 2 : end
-    1.0f,-1.0f, 1.0f,//3
-    -1.0f,-1.0f,-1.0f,
-    1.0f,-1.0f,-1.0f,
-    0.0f, -1.0f, 0.0f,
-    1.0f, 1.0f,-1.0f,//4
-    1.0f,-1.0f,-1.0f,
-    -1.0f,-1.0f,-1.0f,
-     0.0f, 0.0f, -1.0f,
-    -1.0f,-1.0f,-1.0f,//5
-    -1.0f, 1.0f, 1.0f,
-    -1.0f, 1.0f,-1.0f,
-    -1.0f, 0.0f, 0.0f,
-    1.0f,-1.0f, 1.0f,//6
-    -1.0f,-1.0f, 1.0f,
-    -1.0f,-1.0f,-1.0f,
-    0.0f, -1.0f, 0.0f,
-    -1.0f, 1.0f, 1.0f,//7
-    -1.0f,-1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    0.0f, 0.0f, 1.0f,
-    1.0f, 1.0f, 1.0f,//8
-    1.0f,-1.0f,-1.0f,
-    1.0f, 1.0f,-1.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f,-1.0f,-1.0f,//9
-    1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    1.0f, 0.0f, 0.0f,
-    1.0f, 1.0f, 1.0f,//10
-    1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f,-1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 1.0f, 1.0f,//11
-    -1.0f, 1.0f,-1.0f,
-    -1.0f, 1.0f, 1.0f,
-    0.0f, 1.0f, 0.0f,
-    1.0f, 1.0f, 1.0f,//12
-    -1.0f, 1.0f, 1.0f,
-    1.0f,-1.0f, 1.0f,
-    0.0f, 0.0f, 1.0f
+    -0.5f, -0.5f, -0.5f,
+-0.5f, -0.5f, 0.5f,
+-0.5f, 0.5f, 0.5f,
+-1.0f, 0.0f, 0.0f,
+0.5f, 0.5f, -0.5f,
+-0.5f, -0.5f, -0.5f,
+-0.5f, 0.5f, -0.5f,
+0.0f, 0.0f, -1.0f,
+0.5f, -0.5f, 0.5f,
+-0.5f, -0.5f, -0.5f,
+0.5f, -0.5f, -0.5f,
+0.0f, -1.0f, 0.0f,
+0.5f, 0.5f, -0.5f,
+0.5f, -0.5f, -0.5f,
+-0.5f, -0.5f, -0.5f,
+0.0f, 0.0f, -1.0f,
+-0.5f, -0.5f, -0.5f,
+-0.5f, 0.5f, 0.5f,
+-0.5f, 0.5f, -0.5f,
+-1.0f, 0.0f, 0.0f,
+0.5f, -0.5f, 0.5f,
+-0.5f, -0.5f, 0.5f,
+-0.5f, -0.5f, -0.5f,
+0.0f, -1.0f, 0.0f,
+-0.5f, 0.5f, 0.5f,
+-0.5f, -0.5f, 0.5f,
+0.5f, -0.5f, 0.5f,
+0.0f, 0.0f, 1.0f,
+0.5f, 0.5f, 0.5f,
+0.5f, -0.5f, -0.5f,
+0.5f, 0.5f, -0.5f,
+1.0f, 0.0f, 0.0f,
+0.5f, -0.5f, -0.5f,
+0.5f, 0.5f, 0.5f,
+0.5f, -0.5f, 0.5f,
+1.0f, 0.0f, 0.0f,
+0.5f, 0.5f, 0.5f,
+0.5f, 0.5f, -0.5f,
+-0.5f, 0.5f, -0.5f,
+0.0f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f,
+-0.5f, 0.5f, -0.5f,
+-0.5f, 0.5f, 0.5f,
+0.0f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f,
+-0.5f, 0.5f, 0.5f,
+0.5f, -0.5f, 0.5f,
+0.0f, 0.0f, 1.0f
 );
 struct Hit 
 { vec3 pos; vec3 normal; bool hit;};
@@ -116,7 +116,7 @@ bool intersectsCube(vec3 ray, vec3 shift)
     {
         int off = i*12;
         vec3 src = camera.position - shift;
-        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off])*0.5f, vec3(cube[0+off], cube[1+off], cube[2+off]));
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
         if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f,vec3(cube[3+off], cube[4+off], cube[5+off])*0.5f, vec3(cube[6+off], cube[7+off], cube[8+off])*0.5f) && dot(contact-src, ray) > 0)
             return true;
     }
@@ -183,13 +183,13 @@ float dist2(vec3 v1, vec3 v2)
 }
 Hit intersectsCubePoint(vec3 ray, vec3 shift)
 {
-    Hit hit = Hit(vec3(-199, -199, -199), vec3(cube[9], cube[10], cube[11]), false);
+    Hit hit = Hit(vec3(-2000, -2000, -2000), vec3(cube[9], cube[10], cube[11]), false);
     for(int i=0; i < 12; i++)
     {
         int off = i*12;
         vec3 src = camera.position - shift;
-        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f);
-        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off])*0.5f,vec3(cube[3+off], cube[4+off], cube[5+off])*0.5f, vec3(cube[6+off], cube[7+off], cube[8+off])*0.5f) 
+        vec3 contact = intersectPoint(ray, src, vec3(cube[9+off], cube[10+off], cube[11+off]), vec3(cube[0+off], cube[1+off], cube[2+off]));
+        if(pointInPolygon(contact, vec3(cube[0+off], cube[1+off], cube[2+off]),vec3(cube[3+off], cube[4+off], cube[5+off]), vec3(cube[6+off], cube[7+off], cube[8+off])) 
             && dist2(contact, src)<dist2(src, hit.pos))
             hit = Hit(contact, vec3(cube[9+off], cube[10+off], cube[11+off]), true);
     }
@@ -250,7 +250,7 @@ vec3 voxel_traversal_closest2(vec3 origin, vec3 dir, int steps)
             vec3 shift2 = shift+directions[j];
             if(voxels(getId(shift2, demon)).w!=0 && intersect(Ray(camera.position-shift2, dir), -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)))
             {
-                return shift;
+                return shift2;
             }
         }
     }
@@ -285,21 +285,31 @@ vec3 intersectsTestScene(vec3 ray)
 }
 vec3 traverse(vec3 ray)
 {
-    vec3 res = voxel_traversal_closest2(camera.position, ray, 50);
+    vec3 res = voxel_traversal_closest2(camera.position, ray, 100);
     if(res.x!=-10)
     {
         //return vec3(1,1,1);
-        Hit hit =  Hit(vec3(-199, -199, -199), vec3(2, 2, 2), false);
+        Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(2, 2, 2), false);
         int off = 0;
         for(int i=0;i<7;i++)
         {
-            if(voxels(getId(res+directions[i], demon)).w==0)
+            vec3 newPos = res+directions[i];
+            if(voxels(getId(newPos, demon)).w==0)
                 continue;
-            Hit hit2 = intersectsCubePoint(ray, res+directions[i]);
-            if(hit2.hit && dist2(hit.pos, camera.position)>dist2(hit2.pos, camera.position))
+            
+            Hit hit2 = intersectsCubePoint(ray, newPos);
+            if(hit2.hit)
             {
-                hit = hit2;
-                off = i;
+                if(!hit.hit)
+                {
+                    hit = hit2;
+                    off = i;
+                }
+                else if(dist2(hit2.pos+newPos, camera.position)<dist2(hit.pos+newPos, camera.position))
+                {
+                    hit = hit2;
+                    off = i;
+                }
             }
         }
         if(hit.hit)
@@ -308,9 +318,8 @@ vec3 traverse(vec3 ray)
 
             float slope = abs(dot(hit.normal, normalize(lightDir)));
             vec3 color = voxels(getId(res+directions[off], demon)).xyz;
-            return color*slope;
+            return color;
         }
-        return vec3(0,0,0);
     }
 
     return vec3(0,0,0);

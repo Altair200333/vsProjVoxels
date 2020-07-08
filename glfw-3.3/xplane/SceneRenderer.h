@@ -123,14 +123,14 @@ public:
 		voxels.resize(demon*demon*demon, {0, 0, 0, 0});
 		for(int i=0;i<10;i++)
 		{
-			for (int j = 0; j < 1; j++)
+			for (int j = 0; j < 2; j++)
 			{
-				voxels[getId(i*3, 1, j, demon)] = { float(i)/10.0f,0.6f, 1, 1 };
+				voxels[getId(i*2, 1, j, demon)] = { float(i)/10.0f,float(j) , 1, 1 };
 			}
 		}
 		for (int i = 0; i < 20; i++)
 		{
-			voxels[getId(15, i, 15, demon)] = { 0.6f,0.6f, 1, 1 };
+			voxels[getId(15, i, 15, demon)] = { 0.3f,0.6f, 1, 1 };
 		}
 		loadAll();
 	}
