@@ -15,7 +15,7 @@ public:
 	Scene(Window* _window):window(_window)
 	{
 		Object* object = new Object();
-		object->addComponent(new Transform(object, {1,2,1}));
+		object->addComponent(new Transform(object, {10,2,10}));
 		object->addComponent(new Camera(object, static_cast<float>(window->width) / window->height, 60.0f));
 		addCamera(object);
 	}

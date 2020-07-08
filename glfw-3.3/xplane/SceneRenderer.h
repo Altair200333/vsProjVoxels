@@ -121,16 +121,27 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		voxels.resize(demon*demon*demon, {0, 0, 0, 0});
-		for(int i=0;i<10;i++)
+		for(int i=1;i<100;i++)
 		{
-			for (int j = 0; j < 2; j++)
+			for (int j = 1; j < 100; j++)
 			{
-				voxels[getId(i, 1, j*3, demon)] = { float(i)/10.0f,float(j) , 1, 1 };
+				voxels[getId(i, 1, j, demon)] = { float(i)/10.0,0.8f , 1, 1 };
+			}
+		}
+		for (int i = 20; i < 40; i++)	
+		{
+			for (int j = 1; j < 10; j++)
+			{
+				voxels[getId(i, j, 4, demon)] = { 0.9f,0.8f , 1, 1 };
 			}
 		}
 		for (int i = 0; i < 20; i++)
 		{
-			voxels[getId(15, i, 15, demon)] = { 0.3f,0.6f, 1, 1 };
+			voxels[getId(20, i, 20, demon)] = { 0.3f,0.6f, 1, 1 };
+		}
+		for (int i = 0; i < 20; i++)
+		{
+			voxels[getId(50, i, 50, demon)] = { 0.3f,0.6f, 1, 1 };
 		}
 		loadAll();
 	}
