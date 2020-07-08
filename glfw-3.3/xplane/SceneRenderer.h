@@ -125,7 +125,7 @@ public:
 		{
 			for (int j = 0; j < 2; j++)
 			{
-				voxels[getId(i*2, 1, j, demon)] = { float(i)/10.0f,float(j) , 1, 1 };
+				voxels[getId(i, 1, j*3, demon)] = { float(i)/10.0f,float(j) , 1, 1 };
 			}
 		}
 		for (int i = 0; i < 20; i++)

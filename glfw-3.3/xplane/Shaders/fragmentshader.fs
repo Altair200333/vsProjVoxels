@@ -238,7 +238,7 @@ vec3 voxel_traversal_closest2(vec3 origin, vec3 dir, int steps)
     vec3 ray = origin;
     dir = normalize(dir);
 
-    float step = 0.9f;
+    float step = 0.8f;
 
     for (int i=0;i<steps;i++)
     {
@@ -250,7 +250,7 @@ vec3 voxel_traversal_closest2(vec3 origin, vec3 dir, int steps)
             vec3 shift2 = shift+directions[j];
             if(voxels(getId(shift2, demon)).w!=0 && intersect(Ray(camera.position-shift2, dir), -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)))
             {
-                return shift2;
+                return shift;
             }
         }
     }
@@ -263,24 +263,28 @@ vec3 reflect(vec3 I, vec3 N)
 vec3 intersectsTestScene(vec3 ray)
 {
     ray = normalize(ray);
+    Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 0, 0), false);
     for(int i=0;i<20; ++i)
     {
-        vec3 shift = vec3(2*i,0,0);//texelFetch(VertexSampler0, i).xyz;
+        vec3 shift = vec3(i,1,0);//texelFetch(VertexSampler0, i).xyz;
         if(voxels(getId(shift, demon)).w==0)
             continue;
+
         vec3 src = camera.position - shift;
         Ray r = Ray(src, ray);
         if(intersect(r, -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)))
         {            
-            Hit hit = intersectsCubePoint(ray, shift);
-            if(hit.hit)
+            Hit hit2 = intersectsCubePoint(ray, shift);
+            if(hit2.hit)
             {
-                float slope = abs(dot(hit.normal, normalize(lightDir)));
-                return vec3((hit.pos.x+1)*0.5f, 0.2f, 0.2f);
+                if(dist2(hit2.pos+shift, camera.position)<dist2(hit.pos+shift, camera.position))
+                {
+                    hit = hit2;
+                }
             }
-            return vec3(1,1,1);
         }
     }
+
     return vec3(0,0,0);
 }
 vec3 traverse(vec3 ray)
@@ -289,8 +293,10 @@ vec3 traverse(vec3 ray)
     if(res.x!=-10)
     {
         //return vec3(1,1,1);
-        Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(2, 2, 2), false);
+        Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 0, 0), false);
+        vec3 oldPos = res;
         int off = 0;
+
         for(int i=0;i<7;i++)
         {
             vec3 newPos = res+directions[i];
@@ -304,11 +310,13 @@ vec3 traverse(vec3 ray)
                 {
                     hit = hit2;
                     off = i;
+                    oldPos = newPos;
                 }
-                else if(dist2(hit2.pos+newPos, camera.position)<dist2(hit.pos+newPos, camera.position))
+                else if(dist2(hit2.pos+newPos, camera.position)<dist2(hit.pos+oldPos, camera.position))
                 {
                     hit = hit2;
                     off = i;
+                    oldPos = newPos;
                 }
             }
         }
@@ -318,7 +326,7 @@ vec3 traverse(vec3 ray)
 
             float slope = abs(dot(hit.normal, normalize(lightDir)));
             vec3 color = voxels(getId(res+directions[off], demon)).xyz;
-            return color;
+            return color*slope;
         }
     }
 
