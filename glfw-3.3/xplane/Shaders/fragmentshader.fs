@@ -186,7 +186,7 @@ bool intersect(Ray r, vec3 min, vec3 max)
  
     return true; 
 } 
-vec3 lightDir = normalize(vec3(0.3f,-0.85f,0.2f));
+vec3 lightDir = normalize(vec3(0.0f,-0.85f,0.4f));
 
 float dist2(vec3 v1, vec3 v2)
 {
@@ -275,13 +275,7 @@ VoxelHit traceHit(vec3 ray, vec3 src)
             Hit hit2 = intersectsCubePoint(ray, src, newPos);
             if(hit2.hit)
             {
-                if(!hit.hit)
-                {
-                    hit = hit2;
-                    off = i;
-                    oldPos = newPos;
-                }
-                else if(dist2(hit2.pos+newPos, src)<dist2(hit.pos+oldPos, src))
+                if(!hit.hit || dist2(hit2.pos+newPos, src)<dist2(hit.pos+oldPos, src) && dot(ray, hit2.pos+newPos-src)>0)
                 {
                     hit = hit2;
                     off = i;
@@ -330,9 +324,9 @@ vec3 traceScene(vec3 ray)
     {
         float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
         vec3 color = voxels(getId(hit.pos, demon)).xyz;
-        VoxelHit shadow = traceHit(-lightDir, hit.pos+hit.relPos+hit.normal*0.001f);
+        VoxelHit shadow = traceHit(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
         if(shadow.hit)
-            return vec3(0.1);
+            return color*0.1;
         
         return color*slope;
     }
