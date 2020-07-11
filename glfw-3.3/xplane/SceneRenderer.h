@@ -18,7 +18,7 @@ protected:
 	Shader shader;
 public:
 	std::vector<glm::vec4> voxels;
-	int demon = 200;
+	int demon = 300;
 
 	//map index of int coordinates to int
 	int getId(int x, int y, int z, int dim)
@@ -92,7 +92,7 @@ public:
 			if (inBounds({ x + shift.x, z + shift.y, y + shift.z }))
 			{
 				int id = getId(x + shift.x, z + shift.y, y + shift.z, demon);
-				voxels[id] = { float(r) / 255,float(g) / 255,float(b) / 255,1 };
+				voxels[id] = { float(r) / 255,float(g) / 255,float(b) / 255,3 };
 			}
 		}
 	}

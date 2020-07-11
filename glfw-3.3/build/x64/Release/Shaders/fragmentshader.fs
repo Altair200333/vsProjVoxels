@@ -349,34 +349,16 @@ vec3 getBackColor(vec3 ray)
     float theta = (atan(ray.z, ray.x) * 180 / M_PI + 180)/360.0f;
     float alpha = (atan(ray.y, sqrt(ray.x * ray.x + ray.z * ray.z)) * 180 / M_PI + 90)/180.0f;
 
-    return vec3(alpha*0.7+0.3, 0.5, 0.2);
-}
-float rand(vec2 co){
-    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
-}
-vec3 getDiffuse(VoxelHit hit)
-{
-    vec4 texel = voxels(getId(hit.pos, demon));
-    float type = texel.w;
-    if(type == 2 || type == 1)
-    {
-        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
-        vec3 color = texel.xyz;
-        return color * slope;
-    }
-    else if(type == 3)
-    {
-        float slope = clamp(-(dot(hit.normal + hit.relPos*0.1f, normalize(lightDir))), 0.1, 1);
-        vec3 color = texel.xyz;
-        return color * slope;
-    }
+    return vec3(alpha, 0.5, 0.2);
 }
 vec3 traceScene(vec3 ray)
 {
     VoxelHit hit = traceHit2(ray, camera.position);
     if(hit.hit)
     {
-        vec3 color = getDiffuse(hit);
+        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
+
+        vec3 color = voxels(getId(hit.pos, demon)).xyz;
         VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
         if(voxels(getId(hit.pos, demon)).w == 2)
         {
@@ -385,9 +367,8 @@ vec3 traceScene(vec3 ray)
             vec3 reflectedColor = getBackColor(ray);
             if(reflectHit.hit)
             {
-                reflectedColor = getDiffuse(reflectHit);
+                reflectedColor = voxels(getId(reflectHit.pos, demon)).xyz;
                 VoxelHit shadowOfReflection = traceHit2(-lightDir, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
-
                 if(shadowOfReflection.hit)
                     reflectedColor*=0.1f;    
             }
@@ -396,7 +377,7 @@ vec3 traceScene(vec3 ray)
         if(shadow.hit)
             return color*0.1;
         
-        return color;
+        return color*slope;
     }
     return getBackColor(ray);
 }
