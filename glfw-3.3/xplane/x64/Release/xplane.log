@@ -1,22 +1,67 @@
 ﻿  SceneRenderer.cpp
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(71,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(72,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.cpp(22,33): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.cpp(22,29): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
   main.cpp
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(71,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(85,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(86,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(72,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(37,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   mixerEngine.cpp
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(71,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(85,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(86,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(72,1): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(93,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(37,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.cpp(43,61): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.cpp(43,42): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  11 of 766 functions ( 1.4%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    11 functions had inline decision re-evaluated but remain unchanged
+  41 of 755 functions ( 5.4%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    8 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
 glfw3.lib(context.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(context.obj)' or at 'E:\WORK\CPP\vsProjVoxels\glfw-3.3\build\x64\Release\glfw.pdb'; linking object as if no debug info
 glfw3.lib(init.obj) : warning LNK4099: PDB 'glfw.pdb' was not found with 'glfw3.lib(init.obj)' or at 'E:\WORK\CPP\vsProjVoxels\glfw-3.3\build\x64\Release\glfw.pdb'; linking object as if no debug info

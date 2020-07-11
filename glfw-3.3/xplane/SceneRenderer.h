@@ -39,13 +39,14 @@ public:
 	                                                      shader("Shaders/vertexshader.vs", "Shaders/fragmentshader.fs",
 	                                                             "Shaders/geometry.gs")
 	{
-		voxels = importPlyVoxels("data/castle.ply");
+		voxels.resize(demon * demon * demon, { 0,0,0,0 });
+		importPlyVoxels("data/monu10.ply", {90, 2, 90});
 
 		for(int i=1;i<demon-1;i++)
 		{
 			for (int j = 1; j < demon - 1; j++)
 			{
-				voxels[getId(i, 1, j, demon)] = { float(i)/10.0,0.8f , 1, 1 };
+				voxels[getId(i, 1, j, demon)] = { float(i)/10.0,0.8f , 1, 2 };
 			}
 		}
 		
@@ -75,17 +76,23 @@ public:
 	void drawScene() const;
 	void swapBuffers() const;
 	~SceneRenderer() = default;
-	std::vector<glm::vec4> importPlyVoxels(std::string filename)
+	
+	bool inBounds(glm::vec3 point)
 	{
-		std::vector<glm::vec4> data;
-		data.resize(demon * demon * demon, { 0,0,0,0 });
+		return point.x >= 0 && point.x < demon && point.y >= 0 && point.y < demon && point.z >= 0 && point.z < demon;
+	}
+	void importPlyVoxels(std::string filename, glm::vec3 shift)
+	{
+		
 		std::ifstream infile(filename);
 		int x, y, z, r, g, b;
 		while (infile >> x >> y >> z >> r >> g >> b)
 		{
-			int id = getId(x+20, z+2, y+20, demon);
-			data[id] = { float(r)/255,float(g) / 255,float(b) / 255,1 };
+			if (inBounds({ x + shift.x, z + shift.y, y + shift.z }))
+			{
+				int id = getId(x + shift.x, z + shift.y, y + shift.z, demon);
+				voxels[id] = { float(r) / 255,float(g) / 255,float(b) / 255,1 };
+			}
 		}
-		return data;
 	}
 };

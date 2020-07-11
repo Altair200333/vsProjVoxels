@@ -324,7 +324,7 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 }
 VoxelHit traceHit2(vec3 ray, vec3 src)
 {
-    vec3 res = traverse2(src, src+ray*100.0f);
+    vec3 res = traverse2(src, src+ray*300.0f);
    
     Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
 
@@ -349,6 +349,20 @@ vec3 traceScene(vec3 ray)
         float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
         vec3 color = voxels(getId(hit.pos, demon)).xyz;
         VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
+        if(voxels(getId(hit.pos, demon)).w == 2)
+        {
+            vec3 reflection = reflect(normalize(ray), hit.normal);
+            VoxelHit reflectHit = traceHit2(reflection, hit.pos+hit.relPos+hit.normal*0.0001f);
+            vec3 reflectedColor = vec3(0.1);
+            if(reflectHit.hit)
+            {
+                reflectedColor = voxels(getId(reflectHit.pos, demon)).xyz;
+                VoxelHit shadowOfReflection = traceHit2(-lightDir, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
+                if(shadowOfReflection.hit)
+                    reflectedColor*=0.1f;
+                color = color*0.5 + reflectedColor*0.5;
+            }
+        }
         if(shadow.hit)
             return color*0.1;
         
