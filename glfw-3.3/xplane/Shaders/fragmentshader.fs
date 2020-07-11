@@ -217,6 +217,10 @@ int getId(vec3 v, int dim)
 {
     return  int(round(v.z)) * dim * dim + int(round(v.y)) * dim + int(round(v.x));
 }
+int getSwapId(vec3 v, int dim)
+{
+	return int(v.y)* dim* dim +int(v.z)* dim + int(v.x);
+}
 vec4 voxels(int id)
 {
     return texelFetch(VertexSampler0, id);
@@ -294,65 +298,90 @@ VoxelHit traceHit(vec3 ray, vec3 src)
         hit.hit = false;
     return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
 }
-vec3 traverse2(vec3 src, vec3 dir)
+vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 {
-	dir = normalize(dir);
-	int X = int(round(src.x));
-	int Y = int(round(src.y));
-	int Z = int(round(src.z));
-	float stepX, stepY, stepZ;
-	stepX = int(sign(dir.x));
-	stepY = int(sign(dir.y));
-	stepZ = int(sign(dir.z));
-	float near_x = (stepX >= 0) ? (X + 1) - src.x : src.x - X;
-	float near_y = (stepY >= 0) ? (Y + 1) - src.y : src.y - Y;
-	float near_z = (stepZ >= 0) ? (Z + 1) - src.z : src.z - Z;
-	//How far along the ray we must move to cross the first vertical (ray_step_to_vside) / or horizontal (ray_step_to_hside) grid line
-	float tMaxX = (dir.x != 0) ? near_x / dir.x : DBL_MAX;
-	float tMaxY = (dir.y != 0) ? near_y / dir.y : DBL_MAX;
-	float tMaxZ = (dir.z != 0) ? near_z / dir.z : DBL_MAX;
-	float tDeltaX = (dir.x != 0) ? 1.0f / dir.x : DBL_MAX;
-	float tDeltaY = (dir.y != 0) ? 1.0f / dir.y : DBL_MAX;
-	float tDeltaZ = (dir.y != 0) ? 1.0f / dir.y : DBL_MAX;
-	int justOutX = 100;
-	vec3 list = vec3(-1,-1,-1);
-	do {
-		if (tMaxX < tMaxY) {
-			if (tMaxX < tMaxZ) {
-				X = X + int(stepX);
-				if (X == justOutX)
-					return vec3(-1,-1,-1); /* outside grid */
-				tMaxX = tMaxX + tDeltaX;
-			}
-			else {
-				Z = Z + int(stepZ);
-				if (Z == justOutX)
-					return vec3(-1,-1,-1);
-				tMaxZ = tMaxZ + tDeltaZ;
-			}
+    float tmp = v3dStart.y;
+    v3dStart.y = v3dStart.z;
+    v3dStart.z = tmp;
+    tmp = v3dEnd.y;
+    v3dEnd.y = v3dEnd.z;
+    v3dEnd.z = tmp;
+
+	float x1 = v3dStart.x + 0.5f;
+	float y1 = v3dStart.y + 0.5f;
+	float z1 = v3dStart.z + 0.5f;
+	float x2 = v3dEnd.x + 0.5f;
+	float y2 = v3dEnd.y + 0.5f;
+	float z2 = v3dEnd.z + 0.5f;
+
+	int i = int(floor(x1));
+	int j = int(floor(y1));
+	int k = int(floor(z1));
+
+	int iend = int(floor(x2));
+	int jend = int(floor(y2));
+	int kend = int(floor(z2));
+
+	int di = ((x1 < x2) ? 1 : ((x1 > x2) ? -1 : 0));
+	int dj = ((y1 < y2) ? 1 : ((y1 > y2) ? -1 : 0));
+	int dk = ((z1 < z2) ? 1 : ((z1 > z2) ? -1 : 0));
+
+	float deltatx = 1.0f / abs(x2 - x1);
+	float deltaty = 1.0f / abs(y2 - y1);
+	float deltatz = 1.0f / abs(z2 - z1);
+
+	float minx = floor(x1), maxx = minx + 1.0f;
+	float tx = ((x1 > x2) ? (x1 - minx) : (maxx - x1))* deltatx;
+	float miny = floor(y1), maxy = miny + 1.0f;
+	float ty = ((y1 > y2) ? (y1 - miny) : (maxy - y1))* deltaty;
+	float minz = floor(z1), maxz = minz + 1.0f;
+	float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
+
+	vec3 curPos = vec3( i,j,k );
+
+	for (;;)
+	{
+		int id = getSwapId(curPos, demon);
+		if (voxels(id).w!=0)
+		{
+			return curPos;
 		}
-		else {
-			if (tMaxY < tMaxZ) {
-				Y = Y + int(stepY);
-				if (Y == justOutX)
-					return vec3(-1,-1,-1);
-				tMaxY = tMaxY + tDeltaY;
-			}
-			else {
-				Z = Z + int(stepZ);
-				if (Z == justOutX)
-					return vec3(-1,-1,-1);
-				tMaxZ = tMaxZ + tDeltaZ;
-			}
+		if (tx <= ty && tx <= tz)
+		{
+			if (i == iend) break;
+			tx += deltatx;
+			i += di;
+
+			if (di == 1) curPos.x+=1;
+			if (di == -1) curPos.x -= 1;
 		}
-		
-		list = voxels(getId(vec3( X, Y, Z ), demon)).w == 0 ? vec3(-1, -1, -1) : vec3(X,Y,Z);
-	} while (list.x == -1);
-	return list;
+		else if (ty <= tz)
+		{
+			if (j == jend) break;
+			ty += deltaty;
+			j += dj;
+
+			if (dj == 1) curPos.y += 1;
+			if (dj == -1) curPos.y -= 1;
+		}
+		else
+		{
+			if (k == kend) break;
+			tz += deltatz;
+			k += dk;
+
+			if (dk == 1) curPos.z= 1;
+			if (dk == -1) curPos.z -= 1;
+		}
+	}
+	return vec3( -1,-1,-1 );
 }
 VoxelHit traceHit2(vec3 ray, vec3 src)
 {
-    vec3 res = traverse2(src, ray);
+    vec3 res = traverse2(src, src+ray*200.0f);
+    float tmp = res.y;
+    res.y = res.z;
+    res.z = tmp;
     Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
 
     vec3 relPos;
@@ -371,12 +400,12 @@ VoxelHit traceHit2(vec3 ray, vec3 src)
 }
 vec3 traceScene(vec3 ray)
 {
-    VoxelHit hit = traceHit(ray, camera.position);
+    VoxelHit hit = traceHit2(ray, camera.position);
     if(hit.hit)
     {
         float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
         vec3 color = voxels(getId(hit.pos, demon)).xyz;
-        VoxelHit shadow = traceHit(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
+        VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
         if(shadow.hit)
             return color*0.1;
         

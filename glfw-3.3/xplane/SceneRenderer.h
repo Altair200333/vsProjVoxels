@@ -30,7 +30,10 @@ public:
 	{
 		return static_cast<int>(v.z) * dim * dim + static_cast<int>(v.y) * dim + static_cast<int>(v.x);
 	}
-
+	int getSwapId(glm::vec3 v, int dim)
+	{
+		return static_cast<int>(v.y)* dim* dim + static_cast<int>(v.z)* dim + static_cast<int>(v.x);
+	}
 	glm::vec3 traverse(glm::vec3 v3dStart, glm::vec3 v3dEnd)
 	{
 		using namespace glm;
@@ -71,7 +74,7 @@ public:
 
 		for (;;)
 		{
-			int id = getId({curPos.x, curPos.z, curPos.y}, demon);
+			int id = getSwapId(curPos, demon);
 			if (voxels[id].w!=0)
 			{
 				return curPos;
@@ -119,7 +122,8 @@ public:
 				voxels[getId(i, 1, j, demon)] = { float(i)/10.0,0.8f , 1, 1 };
 			}
 		}
-		glm::vec3 a = traverse({ 2,10.3f,1 }, { 5,0 ,5 });
+		glm::vec3 a = traverse({ 2,10.3f,1 }, { 1,10 ,10 });
+		std::swap(a.y, a.z);
 		std::cout << a.x<<" "<<a.y<<" "<<a.z << "\n";
 		loadAll();
 	}
