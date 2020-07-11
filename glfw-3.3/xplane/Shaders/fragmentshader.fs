@@ -186,7 +186,8 @@ bool intersect(Ray r, vec3 min, vec3 max)
  
     return true; 
 } 
-vec3 lightDir = normalize(vec3(0.0f,-0.85f,0.4f));
+
+vec3 lightDir = normalize(vec3(0.2f,-0.85f,0.4f));
 
 float dist2(vec3 v1, vec3 v2)
 {
@@ -210,7 +211,7 @@ Hit intersectsCubePoint(vec3 ray, vec3 src, vec3 shift)
 }
 uniform int boxes;
 float _bin_size = 1;
-int demon = 500;
+int demon = 200;
 
 int getId(vec3 v, int dim)
 {
@@ -293,29 +294,80 @@ VoxelHit traceHit(vec3 ray, vec3 src)
         hit.hit = false;
     return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
 }
-bool fastHitTest(vec3 dir, vec3 src, int steps)
+vec3 traverse2(vec3 src, vec3 dir)
 {
-    vec3 ray = src;
-    dir = normalize(dir);
+	dir = normalize(dir);
+	int X = int(round(src.x));
+	int Y = int(round(src.y));
+	int Z = int(round(src.z));
+	float stepX, stepY, stepZ;
+	stepX = int(sign(dir.x));
+	stepY = int(sign(dir.y));
+	stepZ = int(sign(dir.z));
+	float near_x = (stepX >= 0) ? (X + 1) - src.x : src.x - X;
+	float near_y = (stepY >= 0) ? (Y + 1) - src.y : src.y - Y;
+	float near_z = (stepZ >= 0) ? (Z + 1) - src.z : src.z - Z;
+	//How far along the ray we must move to cross the first vertical (ray_step_to_vside) / or horizontal (ray_step_to_hside) grid line
+	float tMaxX = (dir.x != 0) ? near_x / dir.x : DBL_MAX;
+	float tMaxY = (dir.y != 0) ? near_y / dir.y : DBL_MAX;
+	float tMaxZ = (dir.z != 0) ? near_z / dir.z : DBL_MAX;
+	float tDeltaX = (dir.x != 0) ? 1.0f / dir.x : DBL_MAX;
+	float tDeltaY = (dir.y != 0) ? 1.0f / dir.y : DBL_MAX;
+	float tDeltaZ = (dir.y != 0) ? 1.0f / dir.y : DBL_MAX;
+	int justOutX = 100;
+	vec3 list = vec3(-1,-1,-1);
+	do {
+		if (tMaxX < tMaxY) {
+			if (tMaxX < tMaxZ) {
+				X = X + int(stepX);
+				if (X == justOutX)
+					return vec3(-1,-1,-1); /* outside grid */
+				tMaxX = tMaxX + tDeltaX;
+			}
+			else {
+				Z = Z + int(stepZ);
+				if (Z == justOutX)
+					return vec3(-1,-1,-1);
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+		}
+		else {
+			if (tMaxY < tMaxZ) {
+				Y = Y + int(stepY);
+				if (Y == justOutX)
+					return vec3(-1,-1,-1);
+				tMaxY = tMaxY + tDeltaY;
+			}
+			else {
+				Z = Z + int(stepZ);
+				if (Z == justOutX)
+					return vec3(-1,-1,-1);
+				tMaxZ = tMaxZ + tDeltaZ;
+			}
+		}
+		
+		list = voxels(getId(vec3( X, Y, Z ), demon)).w == 0 ? vec3(-1, -1, -1) : vec3(X,Y,Z);
+	} while (list.x == -1);
+	return list;
+}
+VoxelHit traceHit2(vec3 ray, vec3 src)
+{
+    vec3 res = traverse2(src, ray);
+    Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
 
-    float step = 1.0f;
-
-    for (int i=0;i<steps;++i)
+    vec3 relPos;
+    if(res.x!=-1)
     {
-        ray += dir * step;
-        vec3 shift = vec3(round(ray.x),round(ray.y),round(ray.z));
-        if(ray.x>=demon || ray.x<0 || ray.y>=demon || ray.y<0 || ray.z>=demon || ray.z<0)
-            return false;
-        for(int j=0;j<7;j++)
+        hit = intersectsCubePoint(ray, src, res);
+        if(hit.hit)
         {
-            vec3 shift2 = shift+directions[j];
-            if(voxels(getId(shift2, demon)).w!=0 && intersect(Ray(src-shift2, dir), -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)) && dot(dir,shift2-src)>0)
-            {
-                return true;
-            }
+            relPos = hit.pos;
+            hit.pos = res; 
         }
     }
-    return false;
+    if(getId(src, demon) == getId(hit.pos, demon))
+        hit.hit = false;
+    return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
 }
 vec3 traceScene(vec3 ray)
 {
