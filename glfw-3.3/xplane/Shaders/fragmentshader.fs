@@ -226,32 +226,6 @@ vec4 voxels(int id)
     return texelFetch(VertexSampler0, id);
 }
 
-vec3 directions[] = vec3[](vec3(0,0,0),vec3(1,0,0),vec3(0,1,0),vec3(0,0,1),vec3(-1,0,0),vec3(0,-1,0),vec3(0,0,-1));
-vec3 voxel_traversal_closest2(vec3 origin, vec3 dir, int steps)
-{
-
-    vec3 ray = origin;
-    dir = normalize(dir);
-
-    float step = 1.0f;
-
-    for (int i=0;i<steps;++i)
-    {
-        ray += dir * step;
-        vec3 shift = vec3(round(ray.x),round(ray.y),round(ray.z));
-        if(ray.x>=demon || ray.x<0 || ray.y>=demon || ray.y<0 || ray.z>=demon || ray.z<0)
-            return vec3(-10,-1,-1);
-        for(int j=0;j<7;j++)
-        {
-            vec3 shift2 = shift+directions[j];
-            if(voxels(getId(shift2, demon)).w!=0 && intersect(Ray(origin-shift2, dir), -vec3(0.5f,0.5f,0.5f), vec3(0.5f,0.5f,0.5f)) && dot(dir, shift2-origin)>0)
-            {
-                return shift;
-            }
-        }
-    }
-    return vec3(-10,-1,-1);
-}
 vec3 reflect(vec3 I, vec3 N)
 {
     return I - N * (dot(I, N) * 2.0f);
@@ -260,43 +234,10 @@ vec3 reflect(vec3 I, vec3 N)
 
 struct VoxelHit 
 { vec3 pos; vec3 normal; bool hit;vec3 relPos; };
-VoxelHit traceHit(vec3 ray, vec3 src)
-{
-    vec3 res = voxel_traversal_closest2(src, ray, 100);
-    Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
-    vec3 oldPos = res;
-    vec3 relPos;
-    if(res.x!=-10)
-    {
-        //return vec3(1,1,1);
-        int off = 0;
 
-        for(int i=0;i<7;i++)
-        {
-            vec3 newPos = res+directions[i];
-            if(voxels(getId(newPos, demon)).w==0)
-                continue;
-            
-            Hit hit2 = intersectsCubePoint(ray, src, newPos);
-            if(hit2.hit)
-            {
-                if(!hit.hit || dist2(hit2.pos+newPos, src)<dist2(hit.pos+oldPos, src) && dot(ray, hit2.pos+newPos-src)>0)
-                {
-                    hit = hit2;
-                    off = i;
-                    oldPos = newPos;
-                }
-            }
-        }
-        if(hit.hit)
-        {
-            relPos = hit.pos;
-            hit.pos = res+directions[off]; 
-        }
-    }
-    if(getId(src, demon) == getId(hit.pos, demon))
-        hit.hit = false;
-    return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
+bool inBounds(vec3 point)
+{
+    return point.x>=0 && point.x<demon && point.y>=0 && point.y<demon && point.z>=0 && point.z<demon;
 }
 vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 {
@@ -341,9 +282,14 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 
 	for (;;)
 	{
+        if(!inBounds(curPos))
+            break;
 		int id = getSwapId(curPos, demon);
 		if (voxels(id).w!=0)
 		{
+            float tmp = curPos.y;
+            curPos.y = curPos.z;
+            curPos.z = tmp;
 			return curPos;
 		}
 		if (tx <= ty && tx <= tz)
@@ -370,7 +316,7 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 			tz += deltatz;
 			k += dk;
 
-			if (dk == 1) curPos.z= 1;
+			if (dk == 1) curPos.z += 1;
 			if (dk == -1) curPos.z -= 1;
 		}
 	}
@@ -378,10 +324,8 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 }
 VoxelHit traceHit2(vec3 ray, vec3 src)
 {
-    vec3 res = traverse2(src, src+ray*200.0f);
-    float tmp = res.y;
-    res.y = res.z;
-    res.z = tmp;
+    vec3 res = traverse2(src, src+ray*100.0f);
+   
     Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
 
     vec3 relPos;
@@ -394,8 +338,7 @@ VoxelHit traceHit2(vec3 ray, vec3 src)
             hit.pos = res; 
         }
     }
-    if(getId(src, demon) == getId(hit.pos, demon))
-        hit.hit = false;
+    
     return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
 }
 vec3 traceScene(vec3 ray)
