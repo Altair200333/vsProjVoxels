@@ -19,7 +19,7 @@ enum Camera_Movement {
 // Default camera values
 const float YAW = -90.0f;
 const float PITCH = 0.0f;
-const float SPEED = 10.3f;
+const float SPEED = 15.3f;
 const float SENSITIVITY = 0.1f;
 const float ZOOM = 60.0f;
 const float ASPECTR = 1.0f;
@@ -52,7 +52,7 @@ public:
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
     void cameraMove(Camera_Movement direction, float deltaTime) const;
-
+    void cameraMove(glm::vec3 direction, float deltaTime) const;
     // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
     void cameraMouseLook(float xoffset, float yoffset, GLboolean constrainPitch = true);
 

@@ -26,9 +26,9 @@ public:
 		return z * dim * dim + y * dim + x;
 	}
 
-	int getId(glm::vec3 v, int dim)
+	int getId(glm::vec3 v)
 	{
-		return static_cast<int>(v.z) * dim * dim + static_cast<int>(v.y) * dim + static_cast<int>(v.x);
+		return round(v.z) * demon * demon + round(v.y) * demon + round(v.x);
 	}
 	int getSwapId(glm::vec3 v, int dim)
 	{
@@ -40,13 +40,14 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		voxels.resize(demon * demon * demon, { 0,0,0,0 });
-		importPlyVoxels("data/monu10.ply", {90, 2, 90});
+		importPlyVoxels("data/monu10.ply", {130, 2, 120});
+		importPlyVoxels("data/monu1.ply", {80, 2, 10});
 
 		for(int i=1;i<demon-1;i++)
 		{
 			for (int j = 1; j < demon - 1; j++)
 			{
-				voxels[getId(i, 1, j, demon)] = { float(i)/10.0,0.8f , 1, 2 };
+				voxels[getId(i, 1, j, demon)] = { 0.5,0.8f , 1, 2 };
 			}
 		}
 		
@@ -69,7 +70,7 @@ public:
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-		shader.setInt("boxes", voxels.size());
+		shader.setInt("demon", demon);
 	}
 	void clearBuffer();
 

@@ -2,6 +2,7 @@
 out vec4 FragColor;
 in vec2 texcoord;
 
+#define M_PI 3.1415926535897932384626433832795
 #define DBL_MAX 3.402823466e+38F 
 struct Camera
 {
@@ -15,6 +16,7 @@ struct Camera
 };
 uniform Camera camera;
 uniform samplerBuffer VertexSampler0;
+uniform int demon ;
 struct Polygon
 {
     vec3 v1;
@@ -210,8 +212,9 @@ Hit intersectsCubePoint(vec3 ray, vec3 src, vec3 shift)
     return hit;
 }
 uniform int boxes;
+
+
 float _bin_size = 1;
-int demon = 200;
 
 int getId(vec3 v, int dim)
 {
@@ -324,7 +327,7 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 }
 VoxelHit traceHit2(vec3 ray, vec3 src)
 {
-    vec3 res = traverse2(src, src+ray*300.0f);
+    vec3 res = traverse2(src, src+ray*200.0f);
    
     Hit hit =  Hit(vec3(-2000, -2000, -2000), vec3(1, 1, 1), false);
 
@@ -341,34 +344,42 @@ VoxelHit traceHit2(vec3 ray, vec3 src)
     
     return VoxelHit(hit.pos, hit.normal, hit.hit, relPos);
 }
+vec3 getBackColor(vec3 ray)
+{
+    float theta = (atan(ray.z, ray.x) * 180 / M_PI + 180)/360.0f;
+    float alpha = (atan(ray.y, sqrt(ray.x * ray.x + ray.z * ray.z)) * 180 / M_PI + 90)/180.0f;
+
+    return vec3(alpha, 0.5, 0.2);
+}
 vec3 traceScene(vec3 ray)
 {
     VoxelHit hit = traceHit2(ray, camera.position);
     if(hit.hit)
     {
         float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
+
         vec3 color = voxels(getId(hit.pos, demon)).xyz;
         VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
         if(voxels(getId(hit.pos, demon)).w == 2)
         {
             vec3 reflection = reflect(normalize(ray), hit.normal);
             VoxelHit reflectHit = traceHit2(reflection, hit.pos+hit.relPos+hit.normal*0.0001f);
-            vec3 reflectedColor = vec3(0.1);
+            vec3 reflectedColor = getBackColor(ray);
             if(reflectHit.hit)
             {
                 reflectedColor = voxels(getId(reflectHit.pos, demon)).xyz;
                 VoxelHit shadowOfReflection = traceHit2(-lightDir, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
                 if(shadowOfReflection.hit)
-                    reflectedColor*=0.1f;
-                color = color*0.5 + reflectedColor*0.5;
+                    reflectedColor*=0.1f;    
             }
+            color = color*0.5 + reflectedColor*0.5;
         }
         if(shadow.hit)
             return color*0.1;
         
         return color*slope;
     }
-    return vec3(0.1);
+    return getBackColor(ray);
 }
 void main() 
 {

@@ -25,19 +25,26 @@ void MixerEngine::onUpdate()
 
 	if (camera == nullptr)
 		return;
-	
+
+	glm::vec3 direction = {0,0,0};
 	if (window.input.getKey(KeyCode::W))
-		camera->cameraMove(FORWARD, deltaTime);
+		direction += camera->Front;
 	if (window.input.getKey(KeyCode::S))
-		camera->cameraMove(BACKWARD, deltaTime);
+		direction -= camera->Front;
 	if (window.input.getKey(KeyCode::A))
-		camera->cameraMove(LEFT, deltaTime);
+		direction -= camera->Right;
 	if (window.input.getKey(KeyCode::D))
-		camera->cameraMove(RIGHT, deltaTime);
+		direction += camera->Right;
 	if (window.input.getKey(KeyCode::E))
-		camera->cameraMove(UP, deltaTime);
+		direction += camera->Up;
 	if (window.input.getKey(KeyCode::Q))
-		camera->cameraMove(DOWN, deltaTime);
+		direction -= camera->Up;
+
+	glm::vec3& postion = camera->owner->getComponent<Transform>()->position;
+	glm::vec3 newPos = postion + direction * deltaTime*camera->movementSpeed;
+	
+	if(viewportRenderer.voxels[viewportRenderer.getId(newPos)].w ==0 && viewportRenderer.inBounds(newPos))
+		camera->cameraMove(direction, deltaTime);
 	
 	if(window.input.getMouseButton(KeyCode::MMB))
 		camera->cameraMouseLook(window.input.dx(), window.input.dy());

@@ -43,7 +43,12 @@ void Camera::cameraMove(Camera_Movement direction, float deltaTime) const
     if (direction == DOWN)
         Position += -Up * velocity;
 }
-
+void Camera::cameraMove(glm::vec3 direction, float deltaTime) const
+{
+    const float velocity = movementSpeed * deltaTime;
+    glm::vec3& Position = owner->getComponent<Transform>()->position;
+    Position += direction * velocity;
+}
 // Processes input received from a mouse input system. Expects the offset value in both the x and y direction.
 void Camera::cameraMouseLook(float xoffset, float yoffset, GLboolean constrainPitch)
 {
