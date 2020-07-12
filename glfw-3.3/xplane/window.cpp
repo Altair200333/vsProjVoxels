@@ -32,13 +32,9 @@ void Window::pollEvents()
 }
 void Window::swapBuffers() const
 {
-	glfwSwapBuffers(glfwGetCurrentContext());
+	glfwSwapBuffers(window);
 }
 
-void Window::hideCursor()
-{
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-}
 
 Window::~Window()
 {
@@ -58,7 +54,7 @@ GLFWwindow* Window::createWindow(size_t width, size_t height, const std::string&
 	glfwMakeContextCurrent(window);
 
 	// tell GLFW to capture our mouse
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	return window;
 }
 

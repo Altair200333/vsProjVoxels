@@ -40,8 +40,8 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		voxels.resize(demon * demon * demon, { 0,0,0,0 });
-		importPlyVoxels("data/monu10.ply", {130, 2, 120});
-		importPlyVoxels("data/monu1.ply", {80, 2, 10});
+		importPlyVoxels("data/monu10.ply", {200, 2, 120});
+		importPlyVoxels("data/bbu.ply", {100, 2, 100});
 
 		for(int i=1;i<demon-1;i++)
 		{

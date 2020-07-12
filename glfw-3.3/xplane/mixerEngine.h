@@ -17,7 +17,6 @@ public:
     
 	MixerEngine(int width, int height):scene(&window), window(width, height, "Voxel ray"), viewportRenderer(&window, &scene)
 	{
-		window.hideCursor();
 
 	}
 

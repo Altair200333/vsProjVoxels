@@ -11,8 +11,8 @@ void MixerEngine::mainLoop()
 		viewportRenderer.drawScene();
 		viewportRenderer.swapBuffers();
 
-		window.pollEvents();
 		onUpdate();
+		window.pollEvents();
 	}
 }
 
@@ -46,7 +46,7 @@ void MixerEngine::onUpdate()
 	if(viewportRenderer.voxels[viewportRenderer.getId(newPos)].w ==0 && viewportRenderer.inBounds(newPos))
 		camera->cameraMove(direction, deltaTime);
 	
-	if(window.input.getMouseButton(KeyCode::MMB))
+	//if(window.input.getMouseButton(KeyCode::MMB))
 		camera->cameraMouseLook(window.input.dx(), window.input.dy());
 
 }

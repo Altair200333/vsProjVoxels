@@ -18,7 +18,6 @@ public:
 	bool shouldClose() const;
 	void pollEvents();
 	void swapBuffers() const;
-	void hideCursor();
 	~Window();
 	
 protected:

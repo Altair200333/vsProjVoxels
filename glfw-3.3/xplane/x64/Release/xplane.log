@@ -34,8 +34,8 @@ E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(94,22): warning C4244: 
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(37,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(35,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   mixerEngine.cpp
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(31,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(94,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
@@ -53,13 +53,13 @@ E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(94,22): warning C4244: 
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(37,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(35,28): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.h(36,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.cpp(50,61): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\mixerEngine.cpp(50,42): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
 LINK : warning LNK4098: defaultlib 'MSVCRTD' conflicts with use of other libs; use /NODEFAULTLIB:library
   Generating code
-  2 of 757 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
+  1 of 755 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
