@@ -1,4 +1,4 @@
-#version 330 core
+#version 460
 out vec4 FragColor;
 in vec2 texcoord;
 
@@ -16,7 +16,7 @@ struct Camera
 };
 uniform Camera camera;
 uniform samplerBuffer VertexSampler0;
-uniform int demon ;
+uniform int demon;
 struct Polygon
 {
     vec3 v1;
@@ -358,78 +358,20 @@ vec3 getBackColor(vec3 ray)
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
-vec3 random3(vec3 c) {
-	float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));
-	vec3 r;
-	r.z = fract(512.0*j);
-	j *= .125;
-	r.x = fract(512.0*j);
-	j *= .125;
-	r.y = fract(512.0*j);
-	return r-0.5;
-}
-const float F3 =  0.3333333;
-const float G3 =  0.1666667;
-float snoise(vec3 p) {
 
-	vec3 s = floor(p + dot(p, vec3(F3)));
-	vec3 x = p - s + dot(s, vec3(G3));
-	 
-	vec3 e = step(vec3(0.0), x - x.yzx);
-	vec3 i1 = e*(1.0 - e.zxy);
-	vec3 i2 = 1.0 - e.zxy*(1.0 - e);
-	 	
-	vec3 x1 = x - i1 + G3;
-	vec3 x2 = x - i2 + 2.0*G3;
-	vec3 x3 = x - 1.0 + 3.0*G3;
-	 
-	vec4 w, d;
-	 
-	w.x = dot(x, x);
-	w.y = dot(x1, x1);
-	w.z = dot(x2, x2);
-	w.w = dot(x3, x3);
-	 
-	w = max(0.6 - w, 0.0);
-	 
-	d.x = dot(random3(s), x);
-	d.y = dot(random3(s + i1), x1);
-	d.z = dot(random3(s + i2), x2);
-	d.w = dot(random3(s + 1.0), x3);
-	 
-	w *= w;
-	w *= w;
-	d *= w;
-	 
-	return dot(d, vec4(52.0));
-}
-vec3 normalNoise(vec2 _st, float _zoom, float _speed){
-	vec2 v1 = _st;
-	vec2 v2 = _st;
-	vec2 v3 = _st;
-	float expon = pow(10.0, _zoom*2.0);
-	v1 /= 1.0*expon;
-	v2 /= 0.62*expon;
-	v3 /= 0.83*expon;
-	float n = _speed;
-	float nr = (snoise(vec3(v1, n)) + snoise(vec3(v2, n)) + snoise(vec3(v3, n))) / 6.0 + 0.5;
-	n =  _speed + 1000.0;
-	float ng = (snoise(vec3(v1, n)) + snoise(vec3(v2, n)) + snoise(vec3(v3, n))) / 6.0 + 0.5;
-	return vec3(nr,ng,0.5);
-}
 vec3 getDiffuse(VoxelHit hit)
 {
     vec4 texel = voxels(getId(hit.pos, demon));
     float type = texel.w;
     if(type == 2 || type == 1)
     {
-        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1, 1);
+        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1f, 1.0f);
         vec3 color = texel.xyz;
         return color * slope;
     }
     else if(type == 3)
     {
-        float slope = clamp(-(dot(hit.normal + normalNoise(hit.relPos.xz, 1.0, 1.0)*0.5f, normalize(lightDir))), 0.1, 1);
+        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1f, 1.0f);
         vec3 color = texel.xyz;
         return color * slope;
     }
@@ -468,6 +410,6 @@ void main()
     vec3 ray = camera.front + camera.right * float(texcoord.x*camera.width - camera.width / 2) * camera.scale + camera.up * float(texcoord.y*camera.height - camera.height / 2) * camera.scale;
 
     
-    FragColor = vec4(traceScene(ray), 1.0f);
+    FragColor = vec4(traceScene(normalize(ray)), 1.0f);
    
 }
