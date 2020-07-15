@@ -15,8 +15,12 @@ struct Camera
     int height;
 };
 uniform Camera camera;
-uniform samplerBuffer VertexSampler0;
 uniform int demon;
+uniform int chunkSize;
+uniform int chunks;
+
+uniform samplerBuffer VertexSampler0;
+
 struct Polygon
 {
     vec3 v1;
@@ -220,6 +224,14 @@ uniform int boxes;
 
 float _bin_size = 1;
 
+int getChunkId(vec3 pos)
+{
+	return demon*demon*demon + int(pos.z) * chunks * chunks + int(pos.y) * chunks + int(pos.x);
+}
+int getSwapChunkId(vec3 pos)
+{
+	return demon * demon * demon + int(pos.y) * chunks * chunks + int(pos.z) * chunks + int(pos.x);
+}
 int getId(vec3 v, int dim)
 {
     return  int(round(v.z)) * dim * dim + int(round(v.y)) * dim + int(round(v.x));
@@ -262,6 +274,133 @@ struct VoxelHit
 bool inBounds(vec3 point)
 {
     return point.x>=0 && point.x<demon && point.y>=0 && point.y<demon && point.z>=0 && point.z<demon;
+}
+bool intersect(vec3 orig, vec3 dir, vec3 min, vec3 max)
+{
+	float tmin = (min.x - orig.x) / dir.x;
+	float tmax = (max.x - orig.x) / dir.x;
+	if (tmin > tmax)
+	{
+		float tmp = tmin;
+		tmin = tmax;
+		tmax = tmp;
+	}
+	float tymin = (min.y - orig.y) / dir.y;
+	float tymax = (max.y - orig.y) / dir.y;
+	if (tymin > tymax)
+	{
+		float tmp = tymin;
+		tymin = tymax;
+		tymax = tmp;
+	}
+	if ((tmin > tymax) || (tymin > tmax))
+		return false;
+	if (tymin > tmin)
+		tmin = tymin;
+	if (tymax < tmax)
+		tmax = tymax;
+	float tzmin = (min.z - orig.z) / dir.z;
+	float tzmax = (max.z - orig.z) / dir.z;
+	if (tzmin > tzmax)
+	{
+		float tmp = tzmin;
+		tzmin = tzmax;
+		tzmax = tmp;
+	}
+	if ((tmin > tzmax) || (tzmin > tmax))
+		return false;
+	return true;
+}
+vec3 traverseChunk(vec3 v3dStart, vec3 v3dEnd)
+{
+	vec3 start = v3dStart;
+	vec3 dir = normalize(v3dEnd - v3dStart);
+	v3dStart /= float(chunkSize);
+	v3dEnd /= float(chunkSize);
+	float tmp = v3dStart.y;
+	v3dStart.y = v3dStart.z;
+	v3dStart.z = tmp;
+	tmp = v3dEnd.y;
+	v3dEnd.y = v3dEnd.z;
+	v3dEnd.z = tmp;
+	float x1 = v3dStart.x + 0.5f;
+	float y1 = v3dStart.y + 0.5f;
+	float z1 = v3dStart.z + 0.5f;
+	float x2 = v3dEnd.x + 0.5f;
+	float y2 = v3dEnd.y + 0.5f;
+	float z2 = v3dEnd.z + 0.5f;
+	int i = int(floor(x1));
+	int j = int(floor(y1));
+	int k = int(floor(z1));
+	int iend = int(floor(x2));
+	int jend = int(floor(y2));
+	int kend = int(floor(z2));
+	int di = ((x1 < x2) ? 1 : ((x1 > x2) ? -1 : 0));
+	int dj = ((y1 < y2) ? 1 : ((y1 > y2) ? -1 : 0));
+	int dk = ((z1 < z2) ? 1 : ((z1 > z2) ? -1 : 0));
+	float deltatx = 1.0f / abs(x2 - x1);
+	float deltaty = 1.0f / abs(y2 - y1);
+	float deltatz = 1.0f / abs(z2 - z1);
+	float minx = floor(x1), maxx = minx + 1.0f;
+	float tx = ((x1 > x2) ? (x1 - minx) : (maxx - x1))* deltatx;
+	float miny = floor(y1), maxy = miny + 1.0f;
+	float ty = ((y1 > y2) ? (y1 - miny) : (maxy - y1))* deltaty;
+	float minz = floor(z1), maxz = minz + 1.0f;
+	float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
+	vec3 curPos = vec3(i, j, k);
+	int maxD = demon / chunkSize;
+	
+	while (true)
+	{
+		if (curPos.x < 0 || curPos.x >= maxD || curPos.y < 0 || curPos.y >= maxD || curPos.z < 0 || curPos.z >= maxD)
+			return vec3( -1,-1,-1 );
+		int id = getSwapChunkId(curPos);
+		if (voxels(id).w != 0)
+		{
+			vec3 newStart = curPos;
+			float tmp = newStart.y;
+			newStart.y = newStart.z;
+			newStart.z = tmp;
+			//printVec3(newStart);
+			for (int i = 0; i < chunkSize; i++)
+			{
+				for (int j = 0; j < chunkSize; j++)
+				{
+					for (int k = 0; k < chunkSize; k++)
+					{
+						vec3 pos = newStart * float(chunkSize)+vec3(i,j,k);
+						if (intersect(start -pos, dir, vec3( -0.5,-0.5,-0.5 ), vec3(0.5,0.5,0.5 )))
+							return pos;
+					}
+				}
+			}
+		}
+		if (tx <= ty && tx <= tz)
+		{
+			if (i == iend) break;
+			tx += deltatx;
+			i += di;
+			if (di == 1) curPos.x += 1;
+			if (di == -1) curPos.x -= 1;
+		}
+		else if (ty <= tz)
+		{
+			if (j == jend) break;
+			ty += deltaty;
+			j += dj;
+			if (dj == 1) curPos.y += 1;
+			if (dj == -1) curPos.y -= 1;
+		}
+		else
+		{
+			if (k == kend) break;
+			tz += deltatz;
+			k += dk;
+			if (dk == 1) curPos.z += 1;
+			if (dk == -1) curPos.z -= 1;
+		}
+	}
+	return vec3(-1, -1, -1);
 }
 vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 {
@@ -491,5 +630,4 @@ void main()
 
     
     FragColor = vec4(traceScene(normalize(ray)), 1.0f);
-   
 }

@@ -18,7 +18,7 @@ public:
 	std::vector<glm::vec4> voxels;
 
 	const int demon = 300;
-	const int chunkSize = 5;
+	const int chunkSize = 2;
 	//map index of int coordinates to int
 	int getId(int x, int y, int z, int dim)
 	{
@@ -26,7 +26,13 @@ public:
 	}
 	int getChunkId(glm::vec3 pos)
 	{
-		return demon*demon*demon + pos.z * demon * demon + pos.y * demon + pos.x;
+		int chunks = demon / chunkSize;
+		return demon*demon*demon + pos.z * chunks * chunks + pos.y * chunks + pos.x;
+	}
+	int getSwapChunkId(glm::vec3 pos)
+	{
+		int chunks = demon / chunkSize;
+		return demon * demon * demon + pos.y * chunks * chunks + pos.z * chunks + pos.x;
 	}
 	int getId(glm::vec3 v)
 	{
@@ -86,8 +92,94 @@ public:
 
 		return true;
 	}
+
+	glm::vec3 traverse2(glm::vec3 v3dStart, glm::vec3 v3dEnd)
+	{
+		float tmp = v3dStart.y;
+		v3dStart.y = v3dStart.z;
+		v3dStart.z = tmp;
+		tmp = v3dEnd.y;
+		v3dEnd.y = v3dEnd.z;
+		v3dEnd.z = tmp;
+
+		float x1 = v3dStart.x + 0.5f;
+		float y1 = v3dStart.y + 0.5f;
+		float z1 = v3dStart.z + 0.5f;
+		float x2 = v3dEnd.x + 0.5f;
+		float y2 = v3dEnd.y + 0.5f;
+		float z2 = v3dEnd.z + 0.5f;
+
+		int i = int(floor(x1));
+		int j = int(floor(y1));
+		int k = int(floor(z1));
+
+		int iend = int(floor(x2));
+		int jend = int(floor(y2));
+		int kend = int(floor(z2));
+
+		int di = ((x1 < x2) ? 1 : ((x1 > x2) ? -1 : 0));
+		int dj = ((y1 < y2) ? 1 : ((y1 > y2) ? -1 : 0));
+		int dk = ((z1 < z2) ? 1 : ((z1 > z2) ? -1 : 0));
+
+		float deltatx = 1.0f / abs(x2 - x1);
+		float deltaty = 1.0f / abs(y2 - y1);
+		float deltatz = 1.0f / abs(z2 - z1);
+
+		float minx = floor(x1), maxx = minx + 1.0f;
+		float tx = ((x1 > x2) ? (x1 - minx) : (maxx - x1))* deltatx;
+		float miny = floor(y1), maxy = miny + 1.0f;
+		float ty = ((y1 > y2) ? (y1 - miny) : (maxy - y1))* deltaty;
+		float minz = floor(z1), maxz = minz + 1.0f;
+		float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
+
+		glm::vec3 curPos = glm::vec3(i, j, k);
+		int sid = getSwapId(curPos, demon);
+
+		while (true)
+		{
+			if (!inBounds(curPos))
+				break;
+			int id = getSwapId(curPos, demon);
+			if (voxels[id].w != 0 && sid != id)
+			{
+				float tmp = curPos.y;
+				curPos.y = curPos.z;
+				curPos.z = tmp;
+				return curPos;
+			}
+			if (tx <= ty && tx <= tz)
+			{
+				if (i == iend) break;
+				tx += deltatx;
+				i += di;
+
+				if (di == 1) curPos.x += 1;
+				if (di == -1) curPos.x -= 1;
+			}
+			else if (ty <= tz)
+			{
+				if (j == jend) break;
+				ty += deltaty;
+				j += dj;
+
+				if (dj == 1) curPos.y += 1;
+				if (dj == -1) curPos.y -= 1;
+			}
+			else
+			{
+				if (k == kend) break;
+				tz += deltatz;
+				k += dk;
+
+				if (dk == 1) curPos.z += 1;
+				if (dk == -1) curPos.z -= 1;
+			}
+		}
+		return glm::vec3(-1, -1, -1);
+	}
 	glm::vec3 traverseChunk(glm::vec3 v3dStart, glm::vec3 v3dEnd)
 	{
+		glm::vec3 start = v3dStart;
 		glm::vec3 dir = glm::normalize(v3dEnd - v3dStart);
 		v3dStart /= float(chunkSize);
 		v3dEnd /= float(chunkSize);
@@ -133,17 +225,16 @@ public:
 		
 		while (true)
 		{
-			printVec3(curPos);
 			if (curPos.x < 0 || curPos.x >= maxD || curPos.y < 0 || curPos.y >= maxD || curPos.z < 0 || curPos.z >= maxD)
 				return { -1,-1,-1 };
-			int id = getChunkId(curPos);
+			int id = getSwapChunkId(curPos);
 			if (voxels[id].w != 0)
 			{
 				glm::vec3 newStart = curPos;
 				float tmp = newStart.y;
 				newStart.y = newStart.z;
 				newStart.z = tmp;
-
+				//printVec3(newStart);
 				for (int i = 0; i < chunkSize; i++)
 				{
 					for (int j = 0; j < chunkSize; j++)
@@ -151,7 +242,7 @@ public:
 						for (int k = 0; k < chunkSize; k++)
 						{
 							glm::vec3 pos = newStart * float(chunkSize)+glm::vec3(i,j,k);
-							if (intersect(v3dStart * float(chunkSize)-pos, dir, { -0.5,-0.5,-0.5 }, { 0.5,0.5,0.5 }))
+							if (intersect(start -pos, dir, { -0.5,-0.5,-0.5 }, { 0.5,0.5,0.5 }))
 								return pos;
 						}
 					}
@@ -205,10 +296,12 @@ public:
 				voxels[getId(i, 1, j, demon)] = { 0.5,0.8f , 1, 2 };
 			}
 		}
-		//fillVoxels();
-		//
-		//auto a = traverseChunk({ 1,2,1 }, { 100,2,100 });
-		//printVec3(a);
+		fillVoxels();
+		
+		auto a = traverseChunk({ 1,2,1 }, { 101,5,20 });
+		printVec3(a);
+		auto b = traverse2({ 1,2,1 }, { 101,5,20 });
+		printVec3(b);
 		
 		loadAll();
 	}
@@ -223,7 +316,7 @@ public:
 	{
 		int count = demon / chunkSize;
 		int chunks = count * count * count;
-		int oldSize = voxels.size();
+
 		voxels.resize(voxels.size() + chunks, {0,0,0,0});
 		for(int i =0;i<count-1;i++)
 		{
@@ -259,6 +352,12 @@ public:
 	}
 	void loadAll()
 	{
+		shader.use();
+
+		shader.setInt("demon", demon);
+		shader.setInt("chunkSize", chunkSize);
+		shader.setInt("chunks", demon / chunkSize);
+		
 		unsigned int texture1;
 		glGenBuffers(1, &texture1);
 		glBindBuffer(GL_TEXTURE_BUFFER, texture1);
@@ -274,7 +373,7 @@ public:
 		glBindBuffer(GL_TEXTURE_BUFFER, 0);
 		glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-		shader.setInt("demon", demon);
+
 	}
 	void clearBuffer();
 
@@ -292,6 +391,7 @@ public:
 		std::ifstream infile(filename);
 		
 		std::string line;
+		//skip all info to the end of header
 		while (std::getline(infile, line))
 		{
 			if(line=="end_header")
@@ -300,6 +400,8 @@ public:
 		int x, y, z, r, g, b;
 		while (infile >> x >> y >> z >> r >> g >> b)
 		{
+			//flip x to match model in magicaVoxel
+			x = -x;
 			if (inBounds({ x + shift.x, z + shift.y, y + shift.z }))
 			{
 				int mat = 3;
