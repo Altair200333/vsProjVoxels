@@ -303,13 +303,14 @@ vec3 traverse2(vec3 v3dStart, vec3 v3dEnd)
 	float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
 
 	vec3 curPos = vec3( i,j,k );
+    int sid = getSwapId(curPos, demon);
 
 	while(true)
 	{
         if(!inBounds(curPos))
             break;
 		int id = getSwapId(curPos, demon);
-		if (voxels(id).w!=0)
+		if (voxels(id).w!=0 && sid!=id)
 		{
             float tmp = curPos.y;
             curPos.y = curPos.z;
@@ -370,7 +371,9 @@ vec3 getBackColor(vec3 ray)
     float theta = (atan(ray.z, ray.x) * 180 / M_PI + 180)/360.0f;
     float alpha = (atan(ray.y, sqrt(ray.x * ray.x + ray.z * ray.z)) * 180 / M_PI + 90)/180.0f;
 
-    return vec3(alpha*0.7+0.3, 0.5, 0.2);
+    vec3 res = vec3(alpha*0.7+0.3, 0.5, 0.2);
+    
+    return res;
 }
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -393,13 +396,39 @@ vec3 getDiffuse(VoxelHit hit)
         return color * slope;
     }
 }
+float shadowMul = 0.3f;
+vec3 getDiffuseShadowing(VoxelHit hit)
+{
+    vec3 color = getDiffuse(hit);
+    VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
+    
+    if(shadow.hit)
+    {
+        if(voxels(getId(shadow.pos, demon)).w == 4)
+        {
+            VoxelHit shadow2 = traceHit2(-lightDir, shadow.pos+shadow.relPos-shadow.normal*1.1f);
+            if(shadow2.hit)
+            {
+                color*=shadowMul;
+            }
+            else
+            {
+                color*=0.9f;
+            }
+        }
+        else
+        {
+            color*=shadowMul;
+        }
+    }
+    return color;
+}
 vec3 traceScene(vec3 ray)
 {
     VoxelHit hit = traceHit2(ray, camera.position);
     if(hit.hit)
     {
         vec3 color = getDiffuse(hit);
-        VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
         if(voxels(getId(hit.pos, demon)).w == 2)
         {
             vec3 reflection = reflect(normalize(ray), hit.normal);
@@ -407,11 +436,7 @@ vec3 traceScene(vec3 ray)
             vec3 reflectedColor = getBackColor(reflection);
             if(reflectHit.hit)
             {
-                reflectedColor = getDiffuse(reflectHit);
-                VoxelHit shadowOfReflection = traceHit2(-lightDir, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
-
-                if(shadowOfReflection.hit)
-                    reflectedColor*=0.1f;    
+                reflectedColor = getDiffuseShadowing(reflectHit);   
             }
             color = color*0.5 + reflectedColor*0.5;
         }
@@ -422,11 +447,7 @@ vec3 traceScene(vec3 ray)
             vec3 refractedColor = getBackColor(refraction);
             if(refractHit.hit)
             {
-                refractedColor = getDiffuse(refractHit);
-                VoxelHit shadowOfReflection = traceHit2(-lightDir, refractHit.pos+refractHit.relPos+refractHit.normal*0.0001f);
-
-                if(shadowOfReflection.hit)
-                    refractedColor*=0.1f;    
+                refractedColor = getDiffuseShadowing(refractHit);    
             }
             //--
             vec3 reflection = reflect(normalize(ray), hit.normal);
@@ -434,16 +455,31 @@ vec3 traceScene(vec3 ray)
             vec3 reflectedColor = getBackColor(reflection);
             if(reflectHit.hit)
             {
-                reflectedColor = getDiffuse(reflectHit);
-                VoxelHit shadowOfReflection = traceHit2(-lightDir, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
-
-                if(shadowOfReflection.hit)
-                    reflectedColor*=0.1f;    
+                reflectedColor = getDiffuseShadowing(reflectHit);    
             }
             color = refractedColor*0.75f + reflectedColor*0.25f;
         }
+        VoxelHit shadow = traceHit2(-lightDir, hit.pos+hit.relPos+hit.normal*0.0001f);
+
         if(shadow.hit)
-            return color*0.1;
+        {
+            if(voxels(getId(shadow.pos, demon)).w == 4)
+            {
+                VoxelHit shadow2 = traceHit2(-lightDir, shadow.pos+shadow.relPos-shadow.normal*1.1f);
+                if(shadow2.hit)
+                {
+                    color*=shadowMul;
+                }
+                else
+                {
+                    color*=0.9f;
+                }
+            }
+            else
+            {
+                color*=shadowMul;
+            }
+        }
         
         return color;
     }
