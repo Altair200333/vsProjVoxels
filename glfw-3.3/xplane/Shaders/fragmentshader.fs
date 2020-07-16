@@ -368,6 +368,8 @@ vec3 traceScene(vec3 ray)
     if(hit.hit)
     {
         vec3 color = getDiffuse(hit);
+        //mirror
+        //this is some reasonably bad code so i really have to fix it, i even do have example of better code in my Mixer3D project
         if(voxels(getId(hit.pos, demon)).w == 2)
         {
             vec3 reflection = reflect(normalize(ray), hit.normal);
@@ -375,7 +377,41 @@ vec3 traceScene(vec3 ray)
             vec3 reflectedColor = getBackColor(reflection);
             if(reflectHit.hit)
             {
-                reflectedColor = getDiffuseShadowing(reflectHit);   
+                if(voxels(getId(reflectHit.pos, demon)).w == 2)
+                {
+                    vec3 reflection2 = reflect(normalize(reflection), reflectHit.normal);
+                    VoxelHit reflectHit2 = traceHit2(reflection2, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
+                    vec3 reflectedColor2 = getBackColor(reflection2);
+                    if(reflectHit2.hit)
+                    {
+                        reflectedColor2 = getDiffuseShadowing(reflectHit2);
+                    }
+                    color = color*0.5 + reflectedColor2*0.5;
+                }
+                else if(voxels(getId(reflectHit.pos, demon)).w == 4)
+                {
+                    vec3 refraction = refract(normalize(reflection), reflectHit.normal, 1.23f);
+                    VoxelHit refractHit = traceHit2(refraction, reflectHit.pos+reflectHit.relPos-reflectHit.normal*1.1f);
+                    vec3 refractedColor = getBackColor(refraction);
+                    if(refractHit.hit)
+                    {
+                        refractedColor = getDiffuseShadowing(refractHit);
+                    }
+
+                    vec3 reflection2 = reflect(normalize(reflection), reflectHit.normal);
+                    VoxelHit reflectHit2 = traceHit2(reflection2, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
+                    vec3 reflectedColor = getBackColor(reflection2);
+                    if(reflectHit2.hit)
+                    {
+                        reflectedColor = getDiffuseShadowing(reflectHit2);    
+                    }
+                    color = refractedColor*0.75f + reflectedColor*0.25f;
+                } 
+                
+                else
+                {
+                    reflectedColor = getDiffuseShadowing(reflectHit);
+                }   
             }
             color = color*0.5 + reflectedColor*0.5;
         }
@@ -386,7 +422,40 @@ vec3 traceScene(vec3 ray)
             vec3 refractedColor = getBackColor(refraction);
             if(refractHit.hit)
             {
-                refractedColor = getDiffuseShadowing(refractHit);    
+                if(voxels(getId(refractHit.pos, demon)).w == 2)
+                {
+                    vec3 reflection2 = reflect(normalize(refraction), refractHit.normal);
+                    VoxelHit reflectHit2 = traceHit2(reflection2, refractHit.pos+refractHit.relPos+refractHit.normal*0.0001f);
+                    vec3 reflectedColor2 = getBackColor(reflection2);
+                    if(reflectHit2.hit)
+                    {
+                        reflectedColor2 = getDiffuseShadowing(reflectHit2);
+                    }
+                    refractedColor = color*0.5 + reflectedColor2*0.5;
+                }
+                else if(voxels(getId(refractHit.pos, demon)).w == 4)
+                {
+                    vec3 refraction2 = refract(normalize(refraction), refractHit.normal, 1.23f);
+                    VoxelHit refractHit2 = traceHit2(refraction, refractHit.pos+refractHit.relPos-refractHit.normal*1.1f);
+                    vec3 refractedColor = getBackColor(refraction2);
+                    if(refractHit2.hit)
+                    {
+                        refractedColor = getDiffuseShadowing(refractHit2);
+                    }
+
+                    vec3 reflection2 = reflect(normalize(refraction), refractHit.normal);
+                    VoxelHit reflectHit2 = traceHit2(reflection2, refractHit.pos+refractHit.relPos+refractHit.normal*0.0001f);
+                    vec3 reflectedColor = getBackColor(reflection2);
+                    if(reflectHit2.hit)
+                    {
+                        reflectedColor = getDiffuseShadowing(reflectHit2);    
+                    }
+                    color = refractedColor*0.75f + reflectedColor*0.25f;
+                }
+                else
+                {
+                    refractedColor = getDiffuseShadowing(refractHit);    
+                }
             }
             //--
             vec3 reflection = reflect(normalize(ray), hit.normal);
