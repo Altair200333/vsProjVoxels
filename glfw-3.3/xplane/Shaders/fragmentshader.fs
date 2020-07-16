@@ -445,12 +445,12 @@ vec3 traceScene(vec3 ray)
 
                     vec3 reflection2 = reflect(normalize(refraction), refractHit.normal);
                     VoxelHit reflectHit2 = traceHit2(reflection2, refractHit.pos+refractHit.relPos+refractHit.normal*0.0001f);
-                    vec3 reflectedColor = getBackColor(reflection2);
+                    vec3 reflectedColor2 = getBackColor(reflection2);
                     if(reflectHit2.hit)
                     {
-                        reflectedColor = getDiffuseShadowing(reflectHit2);    
+                        reflectedColor2 = getDiffuseShadowing(reflectHit2);    
                     }
-                    color = refractedColor*0.75f + reflectedColor*0.25f;
+                    color = refractedColor*0.75f + reflectedColor2*0.25f;
                 }
                 else
                 {
