@@ -5,19 +5,23 @@ E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(30,71): warning C4244: 
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(34,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(227,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(35,75): warning C4244: 'return': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(39,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
@@ -30,19 +34,23 @@ E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(30,71): warning C4244: 
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(34,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(227,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(35,75): warning C4244: 'return': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(39,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
@@ -55,19 +63,23 @@ E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(30,71): warning C4244: 
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(34,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(227,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(35,75): warning C4244: 'return': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(39,58): warning C4244: 'return': conversion from 'float' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,48): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float
           ]
-E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(311,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,35): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
+          with
+          [
+              T=float
+          ]
+E:\WORK\CPP\vsProjVoxels\glfw-3.3\xplane\SceneRenderer.h(404,22): warning C4244: 'argument': conversion from 'T' to 'int', possible loss of data
           with
           [
               T=float

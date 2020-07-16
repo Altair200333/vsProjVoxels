@@ -17,8 +17,8 @@ protected:
 public:
 	std::vector<glm::vec4> voxels;
 
-	const int demon = 300;
-	const int chunkSize = 2;
+	const int demon = 100;
+	const int chunkSize = 5;
 	//map index of int coordinates to int
 	int getId(int x, int y, int z, int dim)
 	{
@@ -234,19 +234,11 @@ public:
 				float tmp = newStart.y;
 				newStart.y = newStart.z;
 				newStart.z = tmp;
-				//printVec3(newStart);
-				for (int i = 0; i < chunkSize; i++)
-				{
-					for (int j = 0; j < chunkSize; j++)
-					{
-						for (int k = 0; k < chunkSize; k++)
-						{
-							glm::vec3 pos = newStart * float(chunkSize)+glm::vec3(i,j,k);
-							if (intersect(start -pos, dir, { -0.5,-0.5,-0.5 }, { 0.5,0.5,0.5 }))
-								return pos;
-						}
-					}
-				}
+
+				float dist = glm::length(start - newStart * float(chunkSize));
+				auto a = traverse2(start + dir * dist * 0.9f, start + dir * dist * 1.1f);
+				if (a.x != -1)
+					return a;
 			}
 			if (tx <= ty && tx <= tz)
 			{
@@ -287,21 +279,9 @@ public:
 	{
 		voxels.resize(demon * demon * demon, { 0,0,0,0 });
 		//importPlyVoxels("data/monu10.ply", {200, 2, 120});
-		importPlyVoxels("data/school.ply", {120, 2, 120});
+		importPlyVoxels("data/model2.ply", {50, 2, 50});
 
-		for(int i=1;i<demon-1;i++)
-		{
-			for (int j = 1; j < demon - 1; j++)
-			{
-				voxels[getId(i, 1, j, demon)] = { 0.5,0.8f , 1, 2 };
-			}
-		}
-		fillVoxels();
-		
-		auto a = traverseChunk({ 1,2,1 }, { 101,5,20 });
-		printVec3(a);
-		auto b = traverse2({ 1,2,1 }, { 101,5,20 });
-		printVec3(b);
+		//fillVoxels();
 		
 		loadAll();
 	}
@@ -325,8 +305,10 @@ public:
 				for (int k = 0; k < count-1; k++)
 				{
 					glm::vec3 start = { i * chunkSize,j * chunkSize,k * chunkSize };
+					
 					if(setChunk(start))
 					{
+						//printVec3(start);
 						int id = getChunkId({ i,j,k });
 						voxels[id].w = 1;
 					}
@@ -357,7 +339,7 @@ public:
 		shader.setInt("demon", demon);
 		shader.setInt("chunkSize", chunkSize);
 		shader.setInt("chunks", demon / chunkSize);
-		
+		shader.setFloat("traverseDist", 100.0f);
 		unsigned int texture1;
 		glGenBuffers(1, &texture1);
 		glBindBuffer(GL_TEXTURE_BUFFER, texture1);
