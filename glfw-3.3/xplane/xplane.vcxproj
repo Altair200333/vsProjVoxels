@@ -180,6 +180,7 @@
     <ClInclude Include="MeshRenderer.h" />
     <ClInclude Include="polygon.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="sceneLoader.h" />
     <ClInclude Include="SceneRenderer.h" />
     <ClInclude Include="mixerEngine.h" />
     <ClInclude Include="Object.h" />

@@ -342,7 +342,7 @@ vec3 getDiffuse(VoxelHit hit)
         if(dist<20)
         {
             VoxelHit shadow = traceHit2(dirToLight, hit.pos+hit.relPos+hit.normal*0.0001f);
-            if(!shadow.hit)
+            if(!shadow.hit || length(shadow.pos+shadow.relPos - hit.pos-hit.relPos)>dist)
             {
                 float slope2 = dot(hit.normal, dirToLight);
                 color += texel.xyz*slope2*lights[i].color/(dist*dist)*4; 
@@ -402,7 +402,7 @@ vec3 traceScene(vec3 ray)
                     {
                         reflectedColor2 = getDiffuseShadowing(reflectHit2);
                     }
-                    color = color*0.5 + reflectedColor2*0.5;
+                    reflectedColor = color*0.5 + reflectedColor2*0.5;
                 }
                 else if(voxels(getId(reflectHit.pos, demon)).w == 4)
                 {
@@ -416,12 +416,12 @@ vec3 traceScene(vec3 ray)
 
                     vec3 reflection2 = reflect(normalize(reflection), reflectHit.normal);
                     VoxelHit reflectHit2 = traceHit2(reflection2, reflectHit.pos+reflectHit.relPos+reflectHit.normal*0.0001f);
-                    vec3 reflectedColor = getBackColor(reflection2);
+                    vec3 reflectedColor2 = getBackColor(reflection2);
                     if(reflectHit2.hit)
                     {
-                        reflectedColor = getDiffuseShadowing(reflectHit2);    
+                        reflectedColor2 = getDiffuseShadowing(reflectHit2);    
                     }
-                    color = refractedColor*0.75f + reflectedColor*0.25f;
+                    reflectedColor = refractedColor*0.75f + reflectedColor2*0.25f;
                 } 
                 
                 else

@@ -7,6 +7,8 @@
 #include "shader.h"
 #include <fstream>
 
+#include "sceneLoader.h"
+
 
 class SceneRenderer final
 {
@@ -15,33 +17,7 @@ protected:
 	Scene* scene;
 	Shader shader;
 public:
-	std::vector<glm::vec4> voxels;
-
-	const int demon = 100;
-	const int chunkSize = 5;
-	//map index of int coordinates to int
-	int getId(int x, int y, int z, int dim)
-	{
-		return z * dim * dim + y * dim + x;
-	}
-	int getChunkId(glm::vec3 pos)
-	{
-		int chunks = demon / chunkSize;
-		return demon*demon*demon + pos.z * chunks * chunks + pos.y * chunks + pos.x;
-	}
-	int getSwapChunkId(glm::vec3 pos)
-	{
-		int chunks = demon / chunkSize;
-		return demon * demon * demon + pos.y * chunks * chunks + pos.z * chunks + pos.x;
-	}
-	int getId(glm::vec3 v)
-	{
-		return round(v.z) * demon * demon + round(v.y) * demon + round(v.x);
-	}
-	int getSwapId(glm::vec3 v, int dim)
-	{
-		return static_cast<int>(v.y)* dim* dim + static_cast<int>(v.z)* dim + static_cast<int>(v.x);
-	}
+	
 	void printVec3(glm::vec3 v)
 	{
 		std::cout << v.x<<" "<<v.y<<" "<<v.z<<"\n";
@@ -137,14 +113,14 @@ public:
 		float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
 
 		glm::vec3 curPos = glm::vec3(i, j, k);
-		int sid = getSwapId(curPos, demon);
+		int sid = scene->getSwapId(curPos, scene->demon);
 
 		while (true)
 		{
-			if (!inBounds(curPos))
+			if (!scene->inBounds(curPos))
 				break;
-			int id = getSwapId(curPos, demon);
-			if (voxels[id].w != 0 && sid != id)
+			int id = scene->getSwapId(curPos, scene->demon);
+			if (scene->voxels[id].w != 0 && sid != id)
 			{
 				float tmp = curPos.y;
 				curPos.y = curPos.z;
@@ -185,8 +161,8 @@ public:
 	{
 		glm::vec3 start = v3dStart;
 		glm::vec3 dir = glm::normalize(v3dEnd - v3dStart);
-		v3dStart /= float(chunkSize);
-		v3dEnd /= float(chunkSize);
+		v3dStart /= float(scene->chunkSize);
+		v3dEnd /= float(scene->chunkSize);
 		float tmp = v3dStart.y;
 		v3dStart.y = v3dStart.z;
 		v3dStart.z = tmp;
@@ -225,21 +201,21 @@ public:
 		float tz = ((z1 > z2) ? (z1 - minz) : (maxz - z1))* deltatz;
 
 		glm::vec3 curPos = glm::vec3(i, j, k);
-		int maxD = demon / chunkSize;
+		int maxD = scene->demon / scene->chunkSize;
 		
 		while (true)
 		{
 			if (curPos.x < 0 || curPos.x >= maxD || curPos.y < 0 || curPos.y >= maxD || curPos.z < 0 || curPos.z >= maxD)
 				return { -1,-1,-1 };
-			int id = getSwapChunkId(curPos);
-			if (voxels[id].w != 0)
+			int id = scene->getSwapChunkId(curPos);
+			if (scene->voxels[id].w != 0)
 			{
 				glm::vec3 newStart = curPos;
 				float tmp = newStart.y;
 				newStart.y = newStart.z;
 				newStart.z = tmp;
 
-				float dist = glm::length(start - newStart * float(chunkSize));
+				float dist = glm::length(start - newStart * float(scene->chunkSize));
 				auto a = traverse2(start + dir * dist * 0.9f, start + dir * dist * 1.1f);
 				if (a.x != -1)
 					return a;
@@ -281,9 +257,9 @@ public:
 	                                                      shader("Shaders/vertexshader.vs", "Shaders/fragmentshader.fs",
 	                                                             "Shaders/geometry.gs")
 	{
-		voxels.resize(demon * demon * demon, { 0,0,0,0 });
+		scene->voxels.resize(scene->demon * scene->demon * scene->demon, { 0,0,0,0 });
 		//importPlyVoxels("data/monu10.ply", {200, 2, 120});
-		importPlyVoxels("data/model2.ply", {50, 2, 50});
+		SceneLoader::importPlyModel(scene, "data/model2.ply", {50, 2, 50});
 
 		//fillVoxels();
 		
@@ -291,30 +267,31 @@ public:
 	}
 	bool inChunk(glm::vec3 v, glm::vec3 start)
 	{
-		return v.x > start.x* chunkSize&& v.x<start.x * chunkSize + chunkSize && v.y>start.y* chunkSize&& v.y < start.y * chunkSize + chunkSize && v.z>start.z* chunkSize&& v.z < start.z * chunkSize + chunkSize;
+		return v.x > start.x* scene->chunkSize&& v.x<start.x * scene->chunkSize + scene->chunkSize
+		&& v.y>start.y* scene->chunkSize&& v.y < start.y * scene->chunkSize + scene->chunkSize && v.z>start.z* scene->chunkSize&& v.z < start.z * scene->chunkSize + scene->chunkSize;
 	}
 	
 	//[voxel data],..[..], [chunk data]
 	//[rgb, w]..     [..], [0,0,0,w]
 	void fillVoxels()
 	{
-		int count = demon / chunkSize;
+		int count = scene->demon / scene->chunkSize;
 		int chunks = count * count * count;
 
-		voxels.resize(voxels.size() + chunks, {0,0,0,0});
+		scene->voxels.resize(scene->voxels.size() + chunks, {0,0,0,0});
 		for(int i =0;i<count-1;i++)
 		{
 			for (int j = 0; j < count-1; j++)
 			{
 				for (int k = 0; k < count-1; k++)
 				{
-					glm::vec3 start = { i * chunkSize,j * chunkSize,k * chunkSize };
+					glm::vec3 start = { i * scene->chunkSize,j * scene->chunkSize,k * scene->chunkSize };
 					
 					if(setChunk(start))
 					{
 						//printVec3(start);
-						int id = getChunkId({ i,j,k });
-						voxels[id].w = 1;
+						int id = scene->getChunkId({ i,j,k });
+						scene->voxels[id].w = 1;
 					}
 				}
 			}
@@ -322,14 +299,14 @@ public:
 	}
 	bool setChunk(glm::vec3& start)
 	{
-		for (int i = 0; i < chunkSize; i++)
+		for (int i = 0; i < scene->chunkSize; i++)
 		{
-			for (int j = 0; j < chunkSize; j++)
+			for (int j = 0; j < scene->chunkSize; j++)
 			{
-				for (int k = 0; k < chunkSize; k++)
+				for (int k = 0; k < scene->chunkSize; k++)
 				{
 					glm::vec3 pos = start + glm::vec3(i, j, k);
-					if (voxels[getId(pos)].w != 0)
+					if (scene->voxels[scene->getId(pos)].w != 0)
 						return true;
 				}
 			}
@@ -338,17 +315,21 @@ public:
 	}
 	void loadPointLights()
 	{
-		shader.setVec3("lights[0].pos", { 10,5,10 });
+		shader.setVec3("lights[0].pos", { 53,5,3 });
 		shader.setVec3("lights[0].color", { 0.9f,0.1f,0.1f });
-		shader.setInt("lightCount", 1);
+		
+		shader.setVec3("lights[1].pos", { 20,5,57 });
+		shader.setVec3("lights[1].color", { 0.1f,0.1f,0.9f });
+		shader.setInt("lightCount", 2);
+		
 	}
 	void loadAll()
 	{
 		shader.use();
 
-		shader.setInt("demon", demon);
-		shader.setInt("chunkSize", chunkSize);
-		shader.setInt("chunks", demon / chunkSize);
+		shader.setInt("demon", scene->demon);
+		shader.setInt("chunkSize", scene->chunkSize);
+		shader.setInt("chunks", scene->demon / scene->chunkSize);
 		shader.setFloat("traverseDist", 100.0f);
 		shader.setVec3("lightDir", normalize(glm::vec3(0.2f, -0.85f, 0.5f)));
 		shader.setVec3("dirLightColor", glm::vec3(0.9f, 0.85f, 0.9f));
@@ -357,7 +338,7 @@ public:
 		unsigned int texture1;
 		glGenBuffers(1, &texture1);
 		glBindBuffer(GL_TEXTURE_BUFFER, texture1);
-		glBufferData(GL_TEXTURE_BUFFER, voxels.size() * sizeof(glm::vec4), &voxels[0], GL_STATIC_DRAW);
+		glBufferData(GL_TEXTURE_BUFFER, scene->voxels.size() * sizeof(glm::vec4), &scene->voxels[0], GL_STATIC_DRAW);
 
 		GLuint id;
 		glGenTextures(1, &id);
@@ -377,37 +358,4 @@ public:
 	void swapBuffers() const;
 	~SceneRenderer() = default;
 	
-	bool inBounds(glm::vec3 point)
-	{
-		return point.x >= 0 && point.x < demon && point.y >= 0 && point.y < demon && point.z >= 0 && point.z < demon;
-	}
-	void importPlyVoxels(std::string filename, glm::vec3 shift)
-	{
-		
-		std::ifstream infile(filename);
-		
-		std::string line;
-		//skip all info to the end of header
-		while (std::getline(infile, line))
-		{
-			if(line=="end_header")
-				break;
-		}
-		int x, y, z, r, g, b;
-		while (infile >> x >> y >> z >> r >> g >> b)
-		{
-			//flip x to match model in magicaVoxel
-			x = -x;
-			if (inBounds({ x + shift.x, z + shift.y, y + shift.z }))
-			{
-				int mat = 3;
-				if (r == 0 && g == 0 && b == 0)
-					mat = 2;
-				if (r == 255 && g == 255 && b == 255)
-					mat = 4;
-				int id = getId(x + shift.x, z + shift.y, y + shift.z, demon);
-				voxels[id] = { float(r) / 255,float(g) / 255,float(b) / 255, mat };
-			}
-		}
-	}
 };

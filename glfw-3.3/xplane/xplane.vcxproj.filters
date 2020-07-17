@@ -194,6 +194,9 @@
     <ClInclude Include="LightSource.h">
       <Filter>Header Files\Object&amp;Components</Filter>
     </ClInclude>
+    <ClInclude Include="sceneLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="mixer.rc">

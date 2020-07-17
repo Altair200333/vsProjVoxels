@@ -30,7 +30,7 @@ void SceneRenderer::drawScene() const
     shader.setInt("camera.width", window->width);
     shader.setInt("camera.height", window->height);
     //
-    shader.setInt("demon", demon);
+    shader.setInt("demon", scene->demon);
 	
     GLuint vao; glGenVertexArrays(1, &vao); glBindVertexArray(vao); glDrawArrays(GL_POINTS, 0, 1);
 }

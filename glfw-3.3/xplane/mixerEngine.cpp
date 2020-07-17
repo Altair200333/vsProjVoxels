@@ -18,7 +18,7 @@ void MixerEngine::mainLoop()
 float height = 2;
 bool MixerEngine::isNotOccupied(glm::vec3 pos)
 {
-	return viewportRenderer.voxels[viewportRenderer.getId(pos)].w == 0 && viewportRenderer.inBounds(pos);
+	return scene.voxels[scene.getId(pos)].w == 0 && scene.inBounds(pos);
 }
 void MixerEngine::onUpdate()
 {
