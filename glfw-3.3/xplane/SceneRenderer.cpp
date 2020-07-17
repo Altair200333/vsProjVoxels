@@ -31,7 +31,7 @@ void SceneRenderer::drawScene() const
     shader.setInt("camera.height", window->height);
     //
     shader.setInt("demon", demon);
-	//ooo kurwa magic
+	
     GLuint vao; glGenVertexArrays(1, &vao); glBindVertexArray(vao); glDrawArrays(GL_POINTS, 0, 1);
 }
 void SceneRenderer::swapBuffers() const

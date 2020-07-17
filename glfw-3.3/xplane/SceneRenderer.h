@@ -92,7 +92,11 @@ public:
 
 		return true;
 	}
-
+	struct pointLight
+	{
+		glm::vec3 pos;
+		glm::vec3 color;
+	};
 	glm::vec3 traverse2(glm::vec3 v3dStart, glm::vec3 v3dEnd)
 	{
 		float tmp = v3dStart.y;
@@ -332,6 +336,12 @@ public:
 		}
 		return false;
 	}
+	void loadPointLights()
+	{
+		shader.setVec3("lights[0].pos", { 10,5,10 });
+		shader.setVec3("lights[0].color", { 0.9f,0.1f,0.1f });
+		shader.setInt("lightCount", 1);
+	}
 	void loadAll()
 	{
 		shader.use();
@@ -340,6 +350,10 @@ public:
 		shader.setInt("chunkSize", chunkSize);
 		shader.setInt("chunks", demon / chunkSize);
 		shader.setFloat("traverseDist", 100.0f);
+		shader.setVec3("lightDir", normalize(glm::vec3(0.2f, -0.85f, 0.5f)));
+		shader.setVec3("dirLightColor", glm::vec3(0.9f, 0.85f, 0.9f));
+
+		loadPointLights();
 		unsigned int texture1;
 		glGenBuffers(1, &texture1);
 		glBindBuffer(GL_TEXTURE_BUFFER, texture1);

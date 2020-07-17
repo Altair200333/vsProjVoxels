@@ -23,7 +23,7 @@ public:
 	void mainLoop();
 
 	void onUpdate();
-
+	bool isNotOccupied(glm::vec3 pos);
 	~MixerEngine() = default;
 protected:
 	// timing

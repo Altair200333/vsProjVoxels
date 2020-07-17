@@ -20,9 +20,18 @@ uniform int chunkSize;
 uniform int chunks;
 uniform float traverseDist;
 
+struct light
+{
+    vec3 pos;
+    vec3 color;
+};
+uniform light lights[40];
+uniform int lightCount;
 const float shadowMul = 0.3f;
 uniform samplerBuffer VertexSampler0;
 
+uniform vec3 lightDir;
+uniform vec3 dirLightColor;
 struct Polygon
 {
     vec3 v1;
@@ -130,7 +139,6 @@ struct Ray
  vec3 dir;
 };
 
-vec3 lightDir = normalize(vec3(0.2f,-0.85f,0.5f));
 
 float dist2(vec3 v1, vec3 v2)
 {
@@ -322,18 +330,26 @@ vec3 getDiffuse(VoxelHit hit)
 {
     vec4 texel = voxels(getId(hit.pos, demon));
     float type = texel.w;
-    if(type == 2 || type == 1)
+    
+    float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1f, 1.0f);
+    vec3 color = texel.xyz;
+    color = color * slope*dirLightColor;
+
+    for(int i=0;i <lightCount;i++)
     {
-        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1f, 1.0f);
-        vec3 color = texel.xyz;
-        return color * slope;
+        vec3 dirToLight = lights[i].pos - hit.pos - hit.relPos;
+        float dist = length(dirToLight);
+        if(dist<20)
+        {
+            VoxelHit shadow = traceHit2(dirToLight, hit.pos+hit.relPos+hit.normal*0.0001f);
+            if(!shadow.hit)
+            {
+                float slope2 = dot(hit.normal, dirToLight);
+                color += texel.xyz*slope2*lights[i].color/(dist*dist)*4; 
+            }
+        }
     }
-    else if(type == 3)
-    {
-        float slope = clamp(-(dot(hit.normal, normalize(lightDir))), 0.1f, 1.0f);
-        vec3 color = texel.xyz;
-        return color * slope;
-    }
+    return color;
 }
 
 vec3 getDiffuseShadowing(VoxelHit hit)
@@ -437,10 +453,10 @@ vec3 traceScene(vec3 ray)
                 {
                     vec3 refraction2 = refract(normalize(refraction), refractHit.normal, 1.23f);
                     VoxelHit refractHit2 = traceHit2(refraction, refractHit.pos+refractHit.relPos-refractHit.normal*1.1f);
-                    vec3 refractedColor = getBackColor(refraction2);
+                    vec3 refractedColor2 = getBackColor(refraction2);
                     if(refractHit2.hit)
                     {
-                        refractedColor = getDiffuseShadowing(refractHit2);
+                        refractedColor2 = getDiffuseShadowing(refractHit2);
                     }
 
                     vec3 reflection2 = reflect(normalize(refraction), refractHit.normal);
@@ -450,7 +466,7 @@ vec3 traceScene(vec3 ray)
                     {
                         reflectedColor2 = getDiffuseShadowing(reflectHit2);    
                     }
-                    color = refractedColor*0.75f + reflectedColor2*0.25f;
+                    refractedColor = refractedColor2*0.75f + reflectedColor2*0.25f;
                 }
                 else
                 {

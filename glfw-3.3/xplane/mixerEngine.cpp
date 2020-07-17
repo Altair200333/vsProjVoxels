@@ -15,7 +15,11 @@ void MixerEngine::mainLoop()
 		window.pollEvents();
 	}
 }
-
+float height = 2;
+bool MixerEngine::isNotOccupied(glm::vec3 pos)
+{
+	return viewportRenderer.voxels[viewportRenderer.getId(pos)].w == 0 && viewportRenderer.inBounds(pos);
+}
 void MixerEngine::onUpdate()
 {
 	
@@ -25,12 +29,12 @@ void MixerEngine::onUpdate()
 
 	if (camera == nullptr)
 		return;
-
+	glm::vec3 front = -glm::normalize(glm::cross(camera->Right, camera->WorldUp));
 	glm::vec3 direction = {0,0,0};
 	if (window.input.getKey(KeyCode::W))
-		direction += camera->Front;
+		direction += front;
 	if (window.input.getKey(KeyCode::S))
-		direction -= camera->Front;
+		direction -= front;
 	if (window.input.getKey(KeyCode::A))
 		direction -= camera->Right;
 	if (window.input.getKey(KeyCode::D))
@@ -43,10 +47,10 @@ void MixerEngine::onUpdate()
 	glm::vec3& postion = camera->owner->getComponent<Transform>()->position;
 	glm::vec3 newPos = postion + direction * deltaTime*camera->movementSpeed;
 	
-	if(viewportRenderer.voxels[viewportRenderer.getId(newPos)].w ==0 && viewportRenderer.inBounds(newPos))
+	if(isNotOccupied(newPos))
 		camera->cameraMove(direction, deltaTime);
 	
 	//if(window.input.getMouseButton(KeyCode::MMB))
-		camera->cameraMouseLook(window.input.dx(), window.input.dy());
+	camera->cameraMouseLook(window.input.dx(), window.input.dy());
 
 }
