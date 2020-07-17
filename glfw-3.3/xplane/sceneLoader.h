@@ -44,6 +44,8 @@ public:
 
 		if (j.find("demon") != j.end())
 			scene->demon = j.at("demon");
+		
+		scene->voxels.resize(scene->demon * scene->demon * scene->demon, { 0,0,0,0 });
 		if (j.find("chunkSize") != j.end())
 			scene->chunkSize = j.at("chunkSize");
 		if (j.find("models") != j.end())

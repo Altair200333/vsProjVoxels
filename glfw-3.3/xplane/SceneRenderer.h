@@ -257,7 +257,6 @@ public:
 	                                                      shader("Shaders/vertexshader.vs", "Shaders/fragmentshader.fs",
 	                                                             "Shaders/geometry.gs")
 	{
-		scene->voxels.resize(scene->demon * scene->demon * scene->demon, { 0,0,0,0 });
 		SceneLoader::loadFromJson(scene, "data/cfg.json");
 
 		fillVoxels();
