@@ -258,10 +258,9 @@ public:
 	                                                             "Shaders/geometry.gs")
 	{
 		scene->voxels.resize(scene->demon * scene->demon * scene->demon, { 0,0,0,0 });
-		//importPlyVoxels("data/monu10.ply", {200, 2, 120});
-		SceneLoader::importPlyModel(scene, "data/model2.ply", {50, 2, 50});
+		SceneLoader::loadFromJson(scene, "data/cfg.json");
 
-		//fillVoxels();
+		fillVoxels();
 		
 		loadAll();
 	}
@@ -271,8 +270,6 @@ public:
 		&& v.y>start.y* scene->chunkSize&& v.y < start.y * scene->chunkSize + scene->chunkSize && v.z>start.z* scene->chunkSize&& v.z < start.z * scene->chunkSize + scene->chunkSize;
 	}
 	
-	//[voxel data],..[..], [chunk data]
-	//[rgb, w]..     [..], [0,0,0,w]
 	void fillVoxels()
 	{
 		int count = scene->demon / scene->chunkSize;

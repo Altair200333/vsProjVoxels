@@ -9,14 +9,14 @@
 class Scene final
 {
 public:
-	//voxel data of map stored like this - [r, g, b, w] where w is material identifier 
+	//voxel data of map stored like this - [r, g, b, w] where w is material identifier
 	std::vector<glm::vec4> voxels;
 
 	//dimension of squared world
-	const int demon = 100;
+	int demon = 100;
 	
 	//size of chunk batched
-	const int chunkSize = 5;
+	int chunkSize = 5;
 
 	//--
 	Object* camera;

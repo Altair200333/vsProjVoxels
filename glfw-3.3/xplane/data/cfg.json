@@ -1,0 +1,11 @@
+{
+    "demon": 100,
+    "chunkSize": 5,
+    "models": 
+    [
+        {
+            "name": "data/model2.ply",
+            "shift":[50, 2, 50]
+        }
+    ]
+}
